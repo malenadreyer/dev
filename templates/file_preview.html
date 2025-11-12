@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Preview Example</title>
+    <style>
+        #imagePreview {
+            margin-top: 20px;
+            max-width: 300px;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Preview</h1>
+    <input type="file" id="fileInput" onchange="show_preview()">
+    <br><br>
+    <img id="imagePreview" src="" alt="Image Preview" style="display: none;">
+
+    <script>
+        // const fileInput = document.getElementById('fileInput');
+        // 
+
+        function show_preview(){
+            const imagePreview = document.getElementById('imagePreview');
+            const file = event.target.files[0]; // Get the first file
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block'; // Show the image
+                };
+
+                reader.readAsDataURL(file); // Read the file as a data URL
+            } else {
+                imagePreview.style.display = 'none'; // Hide the image if no file selected
+            }
+        };
+    </script>
+</body>
+</html>

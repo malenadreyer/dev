@@ -1,0 +1,35 @@
+<h1>
+    {{ dictionary.profile[lan] }}
+</h1>
+
+<form class="x-dialog__form" action="{{ url_for('api_update_profile') }}" mix-post autocomplete="off">
+    <div>
+        <label for="user_email">
+        <span>{{ dictionary.email[lan] }}</span>
+        </label>
+        <input name="user_email" id="user_email" type="text" mix-check="{{ x.REGEX_EMAIL }}" value="{{ user.user_email }}">
+    </div>
+    <div>
+        <label for="user_username">
+        <span>{{ dictionary.username[lan] }}</span> - {{ x.USER_USERNAME_MIN }} {{ dictionary.to[lan] }} {{ x.USER_USERNAME_MAX }} {{ dictionary.characters[lan] }}
+        </label>
+        <input name="user_username" id="user_username" type="text" mix-check="{{ x.REGEX_USER_USERNAME }}" value="{{ user.user_username }}">
+    </div>
+    <div>
+        <label for="user_first_name">
+        <span>{{ dictionary.first_name[lan] }}</span> - {{ x.USER_FIRST_NAME_MIN }} {{ dictionary.to[lan] }} {{ x.USER_FIRST_NAME_MAX }} {{ dictionary.characters[lan] }}
+        </label>
+        <input name="user_first_name" id="user_first_name" type="text" mix-check="{{ x.REGEX_USER_USERNAME }}" value="{{ user.user_first_name }}">
+    </div> 
+    <div>
+        <label for="user_last_name">
+        <span>{{ dictionary.last_name[lan] }}</span> - {{ x.USER_FIRST_NAME_MIN }} {{ dictionary.to[lan] }} {{ x.USER_FIRST_NAME_MAX }} {{ dictionary.characters[lan] }}
+        </label>
+        <input name="user_last_name" id="user_last_name" type="text"  value="{{ user.user_last_name }}">
+    </div>            
+    <button class="x-dialog__btn"  
+    mix-default="{{ dictionary.update_profile[lan] }}" 
+    mix-await="Updating profile ...">
+        Update profile
+    </button>
+</form>
