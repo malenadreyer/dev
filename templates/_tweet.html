@@ -1,5 +1,5 @@
-<article class="post" mix-fade-in="5000">
-    <img src="{{ url_for('static', filename='images/'~(tweet.user_avatar_path if tweet.user_avatar_path else 'unknown.jpg')) }}" alt="Profile Picture" 
+<article class="post" mix-fade-in="5000" data-post-pk="{{ tweet.post_pk }}">
+    <img src="{{ url_for('static', filename='uploads/'~(tweet.user_avatar_path if tweet.user_avatar_path else 'unknown.jpg')) }}" alt="Profile Picture" 
     class="w-8 h-8 rounded-full">
     <div class="post-content">
         <div class="post-header">
@@ -12,17 +12,44 @@
         <p class="text">
             {{ tweet.post_message }}
         </p>
-        {% if tweet.post_image_path: %}
-        <img src="{{ url_for('static', filename='images/' ~ tweet.post_image_path) }}" alt="Post image" 
+        {% if tweet.post_image_path %}
+        <img src="{{ url_for('static', filename='uploads/' ~ tweet.post_image_path) }}" alt="Post image" 
         class="w-80">
         {% endif %}
         
         <div class="post-actions">
-            <span class="action"><i class="fa-regular fa-comment"></i> 12</span>
-            <span class="action"><i class="fa-solid fa-retweet"></i> 5</span>
-            {% include "___button_like_tweet.html" %}
-            <span class="action"><i class="fa-solid fa-chart-simple"></i> 230</span>
-            <span class="action"><i class="fa-solid fa-share"></i></span>
+            <!-- Comment -->
+            <button class="action comment-btn">
+                <i class="fa-regular fa-comment"></i> 
+                <span class="comment-count">Comments</span>
+            </button>
+            
+            <!-- Retweet -->
+            <button class="action">
+                <i class="fa-solid fa-retweet"></i> 
+                <span>5</span>
+            </button>
+    
+           
+            <form mix-post="{{ url_for('api_like_post') }}"  style="display: inline; margin: 0;" >
+                <input type="hidden" name="post_pk" value="{{ tweet.post_pk }}">
+                <button type="submit"  class="action like-btn "  >
+                    <i class="fa-regular fa-heart"></i> 
+                    <span class="like-count">{{ tweet.post_total_likes or 0}}</span>
+                </button>
+            </form>
+        
+
+            <!-- Stats -->
+            <button class="action">
+                <i class="fa-solid fa-chart-simple"></i> 
+                <span>230</span>
+            </button>
+            
+            <!-- Share -->
+            <button class="action">
+                <i class="fa-solid fa-share"></i>
+            </button>
         </div>
     </div>
 </article>

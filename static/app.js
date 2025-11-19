@@ -37,7 +37,7 @@ function parse_search_results(data_from_server){
     let user_avatar_path = user.user_avatar_path ? user.user_avatar_path : "unknown.jpg"
     let html = `
         <div class="d-flex a-items-center">
-            <img src="/static/images/${user_avatar_path}" class="w-8 h-8 rounded-full" alt="Profile Picture">
+            <img src="/static/uploads/${user_avatar_path}" class="w-8 h-8 rounded-full" alt="Profile Picture">
             <div class="w-full ml-2">
                 <p class="">
                     ${user.user_first_name} ${user.user_last_name}

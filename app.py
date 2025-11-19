@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, session, redirect, url_for, j
 from flask_session import Session
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
+from datetime import datetime
 import x 
 import requests
 import time
@@ -23,7 +25,14 @@ app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024   # 1 MB
 
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
- 
+
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "static", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Sørg for mappen eksisterer
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS ={"png", "jpg", "jpeg"}
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 ##############################
 ##############################
@@ -152,7 +161,7 @@ def signup(lan = "english"):
 
             user_pk = uuid.uuid4().hex
             user_last_name = ""
-            user_avatar_path = "https://avatar.iran.liara.run/public/40"
+            user_avatar_path = ""
             user_verification_key = uuid.uuid4().hex
             user_verified_at = 0
             user_deleted_at = 0
@@ -272,24 +281,42 @@ def logout():
 
 ##############################
 @app.get("/home-comp")
+@x.no_cache
 def home_comp():
     try:
-
         user = session.get("user", "")
-        if not user: return "error"
+        if not user: return redirect(url_for("login"))
+        
         db, cursor = x.db()
-        q = "SELECT * FROM users JOIN posts ON user_pk = post_user_fk ORDER BY RAND() LIMIT 5"
-        cursor.execute(q)
+        
+        q = """
+            SELECT 
+                posts.*,
+                users.user_first_name,
+                users.user_last_name,
+                users.user_username,
+                users.user_avatar_path,
+                CASE WHEN likes.like_pk IS NOT NULL THEN 1 ELSE 0 END as user_has_liked
+            FROM posts
+            JOIN users ON posts.post_user_fk = users.user_pk
+            LEFT JOIN likes ON posts.post_pk = likes.like_post_fk AND likes.like_user_fk = %s
+            ORDER BY posts.post_created_at DESC
+            LIMIT 20
+        """
+        cursor.execute(q, (user["user_pk"],))
         tweets = cursor.fetchall()
-        ic(tweets)
 
-        html = render_template("_home_comp.html", tweets=tweets)
-        return f"""<mixhtml mix-update="main">{ html }</mixhtml>"""
+        lan = session["user"]["user_language"]
+        
+        home_html = render_template("_home_comp.html", dictionary=dictionary, lan=lan, tweets=tweets, user=user)
+        return f"""<browser mix-update="main">{home_html}</browser>"""
+        
     except Exception as ex:
         ic(ex)
         return "error"
     finally:
-        pass
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
 
 
 ##############################
@@ -297,6 +324,7 @@ def home_comp():
 def profile():
     try:
         user = session.get("user", "")
+
         if not user: return "error"
         q = "SELECT * FROM users WHERE user_pk = %s"
         db, cursor = x.db()
@@ -311,25 +339,54 @@ def profile():
     finally:
         pass
 
-
-
-##############################
-@app.patch("/like-tweet")
+############################################
+@app.get("/profile-watch")
 @x.no_cache
-def api_like_tweet():
+def profile_watch():
     try:
-        button_unlike_tweet = render_template("___button_unlike_tweet.html")
-        return f"""
-            <mixhtml mix-replace="#button_1">
-                {button_unlike_tweet}
-            </mixhtml>
-        """
+        user = session.get("user", "")
+        if not user: 
+            return redirect(url_for("login"))
+        
+        db, cursor = x.db()
+        
+        # Hent bruger info
+        q = "SELECT * FROM users WHERE user_pk = %s"
+        cursor.execute(q, (user["user_pk"],))
+        user = cursor.fetchone()
+        
+        lan = session.get("user", {}).get("user_language", "english")
+        
+        profile_html = render_template("_profile_watch.html", 
+                                      user=user, 
+                                      dictionary=dictionary, 
+                                      lan=lan)
+        return f"""<browser mix-update="main">{profile_html}</browser>"""
+        
     except Exception as ex:
         ic(ex)
         return "error"
     finally:
         if "cursor" in locals(): cursor.close()
-        if "db" in locals(): db.close()
+        if "db" in locals(): db.close()  
+
+##############################
+# @app.patch("/like-tweet")
+# @x.no_cache
+# def api_like_tweet():
+#     try:
+#         button_unlike_tweet = render_template("___button_unlike_tweet.html")
+#         return f"""
+#             <mixhtml mix-replace="#button_1">
+#                 {button_unlike_tweet}
+#             </mixhtml>
+#         """
+#     except Exception as ex:
+#         ic(ex)
+#         return "error"
+#     finally:
+#         if "cursor" in locals(): cursor.close()
+#         if "db" in locals(): db.close()
 
 
 ##############################
@@ -341,10 +398,9 @@ def api_create_post():
         user_pk = user["user_pk"]        
         post = x.validate_post(request.form.get("post", ""))
         post_pk = uuid.uuid4().hex
-        post_image_path = ""
         db, cursor = x.db()
-        q = "INSERT INTO posts VALUES(%s, %s, %s, %s, %s)"
-        cursor.execute(q, (post_pk, user_pk, post, 0, post_image_path))
+        q = "INSERT INTO posts VALUES(%s, %s, %s, %s,%s)"
+        cursor.execute(q, (post_pk, user_pk, post, 0,0))
         db.commit()
         toast_ok = render_template("___toast_ok.html", message="The world is reading your post !")
         tweet = {
@@ -386,6 +442,7 @@ def api_update_profile():
 
     try:
         lan = session["user"]["user_language"]
+        
 
         user = session.get("user", "")
         if not user: return "invalid user"
@@ -394,13 +451,28 @@ def api_update_profile():
         user_email = x.validate_user_email(lan)
         user_username = x.validate_user_username(lan)
         user_first_name = x.validate_user_first_name(lan)
-        user_last_name= request.form.get("user_last_name", "").strip()
+        user_last_name=request.form.get("user_last_name", "").strip()
+        user_avatar_path = user.get("user_avatar_path", "")
+        uploaded_file = request.files.get("user_avatar_path")
+
+        if uploaded_file and uploaded_file.filename != "" and allowed_file(uploaded_file.filename):
+            ext = os.path.splitext(uploaded_file.filename)[1]
+            new_name = f"{uuid.uuid4().hex}{ext}"
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], new_name)
+            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+            uploaded_file.save(save_path)
+            user_avatar_path = new_name
+
 
         # Connect to the database
-        q = "UPDATE users SET user_email = %s, user_username = %s, user_first_name = %s, user_last_name = %s WHERE user_pk = %s"
+        q = "UPDATE users SET user_email = %s, user_username = %s, user_first_name = %s, user_last_name = %s, user_avatar_path=%s WHERE user_pk = %s"
         db, cursor = x.db()
-        cursor.execute(q, (user_email, user_username, user_first_name, user_last_name, user["user_pk"]))
+        cursor.execute(q, (user_email, user_username, user_first_name, user_last_name, user_avatar_path, user["user_pk"]))
         db.commit()
+        
+        user["user_avatar_path"]= user_avatar_path
+        session["user"] = user
+
         
         # Response to the browser
         toast_ok = render_template("___toast_ok.html", message="Profile updated successfully")
@@ -408,14 +480,16 @@ def api_update_profile():
             <browser mix-bottom="#toast">{toast_ok}</browser>
             <browser mix-update="#profile_tag .name">{user_first_name}</browser>
             <browser mix-update="#profile_tag .handle">{user_username}</browser>
+            <browser mix-replace="#profil_tag img"><img src="/static/uploads/{user_avatar_path}" alt="profil"></browser>
             
         """, 200
     except Exception as ex:
         ic(ex)
-        # User errors
-        if ex.args[1] == 400:
+        if len(ex.args) > 1 and ex.args[1] == 400:
             toast_error = render_template("___toast_error.html", message=ex.args[0])
             return f"""<mixhtml mix-update="#toast">{ toast_error }</mixhtml>""", 400
+        # User errors
+      
         
         # Database errors
         if "Duplicate entry" and user_email in str(ex): 
@@ -645,3 +719,151 @@ def forgot_password_page():
     return render_template("forgot_password.html")
 
 
+
+##################################################
+@app.route("/api-like-post", methods=["POST"])
+def api_like_post():
+ 
+    if request.method == "POST":
+        try:
+            user = session.get("user", "")
+            if not user: return "Unauthorized", 401
+            
+            user_pk = user["user_pk"]
+            post_pk = request.form.get("post_pk", "").strip()
+            like_pk = uuid.uuid4().hex 
+            like_created_at = datetime.now()
+            q = "INSERT INTO likes VALUES(%s, %s, %s, %s)"
+            db, cursor = x.db()
+            cursor.execute(q, (like_pk, user_pk, post_pk, like_created_at))
+            db.commit()
+            ic(ex)
+
+            return "error"
+        except Exception as ex:
+            ic(ex)
+            return "error"
+        
+        finally:
+            if "cursor" in locals(): cursor.close()
+            if "db" in locals(): db.close()
+
+
+
+################################################
+# @app.post("/api-add-comment")
+# def api_add_comment():
+#     try:
+#         user = session.get("user", "")
+#         if not user: 
+#             return "Unauthorized", 401
+        
+#         post_pk = request.form.get("post_pk", "").strip()
+#         comment_message = request.form.get("comment_message", "").strip()
+        
+#         if not post_pk or not comment_message:
+#             return "Invalid data", 400
+        
+#         if len(comment_message) < 1 or len(comment_message) > 280:
+#             return "Comment must be 1-280 characters", 400
+        
+#         db, cursor = x.db()
+        
+#         comment_pk = uuid.uuid4().hex
+#         comment_created_at = int(time.time())
+        
+#         q = "INSERT INTO comments VALUES(%s, %s, %s, %s, %s)"
+#         cursor.execute(q, (comment_pk, user["user_pk"], post_pk, comment_message, comment_created_at))
+#         db.commit()
+        
+#         # Hent opdateret antal comments
+#         q = "SELECT post_comments FROM posts WHERE post_pk = %s"
+#         cursor.execute(q, (post_pk,))
+#         post = cursor.fetchone()
+        
+#         toast_ok = render_template("___toast_ok.html", message="Comment added!")
+#         return f"""
+#             <browser mix-bottom="#toast">{toast_ok}</browser>
+#             <browser mix-update="[data-post-pk='{post_pk}'] .comment-count">{post['post_comments']}</browser>
+#         """, 200
+        
+#     except Exception as ex:
+#         ic(ex)
+#         return "Error", 500
+#     finally:
+#         if "cursor" in locals(): cursor.close()
+#         if "db" in locals(): db.close()
+
+@app.route("/api-get-post")
+def api_get_post():
+    try:
+        post_pk = request.args.get("post_pk", "")
+        if not post_pk: return "invalid post"
+
+        db, cursor = x.db()
+        q = "SELECT post_message FROM posts WHERE post_pk = %s"
+        cursor.execute(q, (post_pk,))
+        post = cursor.fetchone()
+
+        if not post:
+            return "post not found"
+
+        return post["post_message"]
+
+    except Exception as ex:
+        ic(ex)
+        return "system error", 500
+
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+##################################################
+
+@app.route("/api-edit-post", methods=["POST"])
+def api_edit_post():
+    try:
+        user = session.get("user", "")
+        if not user: 
+            return "invalid user"
+        user_pk = user["user_pk"]
+
+        post_pk = request.form.get("post_pk", "").strip()
+        if not post_pk:
+            return "invalid post"
+
+        new_text = x.validate_post(request.form.get("post", ""))
+
+        db, cursor = x.db()
+
+        # Check ownership
+        q = "SELECT user_fk FROM posts WHERE post_pk = %s"
+        cursor.execute(q, (post_pk,))
+        post = cursor.fetchone()
+        if not post or post["user_fk"] != user_pk:
+            return "not allowed"
+
+        # Update
+        q = "UPDATE posts SET post_message = %s WHERE post_pk = %s"
+        cursor.execute(q, (new_text, post_pk))
+        db.commit()
+
+        # Update frontend
+        return f"""
+            <browser mix-update="[data-post-pk='{post_pk}'] .post-text">{new_text}</browser>
+        """
+
+    except Exception as ex:
+        ic(ex)
+        if "db" in locals(): db.rollback()
+
+        if "x-error post" in str(ex):
+            toast_error = render_template("___toast_error.html", message=f"Post - {x.POST_MIN_LEN} to {x.POST_MAX_LEN} characters")
+            return f"<browser mix-bottom='#toast'>{toast_error}</browser>"
+
+        toast_error = render_template("___toast_error.html", message="System under maintenance")
+        return f"<browser mix-bottom='#toast'>{toast_error}</browser>", 500
+
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()

@@ -2,7 +2,13 @@
     {{ dictionary.profile[lan] }}
 </h1>
 
-<form class="x-dialog__form" action="{{ url_for('api_update_profile') }}" mix-post autocomplete="off">
+<form class="x-dialog__form" action="{{ url_for('api_update_profile') }}" mix-post autocomplete="off" enctype="multipart/form-data">
+    <div>
+        <label for="user_avatar_path">Profil Image</label>
+        <input type="file" name="user_avatar_path" id="user_avatar_path" accept="image/*" >
+    </div>
+
+    <button type="submit" class="x-dialog__btn"  >Update picture</button>
     <div>
         <label for="user_email">
         <span>{{ dictionary.email[lan] }}</span>
@@ -33,3 +39,55 @@
         Update profile
     </button>
 </form>
+
+<script>
+ document.querySelector('#profileForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    console.log('Form submitted!');
+
+    const formData = new FormData(this);
+    const fileInput = document.querySelector('input[name="user_avatar_path"]');
+    
+    console.log('File input:', fileInput);
+    console.log('Files:', fileInput ? fileInput.files : 'no input');
+
+    const response = await fetch(this.action, {
+        method: 'POST',
+        body: formData
+    });
+
+    const html = await response.text();
+    console.log('Response HTML:', html);
+    
+    document.querySelector('#toast').innerHTML = html;
+
+    // Opdater profilbillede hvis der blev uploaded en ny
+    if(fileInput && fileInput.files.length > 0){
+        console.log('Updating image with FileReader...');
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            console.log('Image loaded, updating src...');
+            
+            const profileImage = document.querySelector('#profileImage');
+            const profileTagImg = document.querySelector('#profile_tag img');
+            
+            console.log('profileImage element:', profileImage);
+            console.log('profile_tag img element:', profileTagImg);
+            
+            if(profileImage) {
+                profileImage.src = e.target.result;
+                console.log('Updated #profileImage');
+            }
+            
+            if(profileTagImg) {
+                profileTagImg.src = e.target.result;
+                console.log('Updated #profile_tag img');
+            }
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    } else {
+        console.log('No file selected');
+    }
+});
+    </script>
