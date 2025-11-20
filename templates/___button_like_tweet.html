@@ -1,3 +1,7 @@
-<button id="button_1" class="action" mix-patch="/like-tweet">
-    <i class="fa-regular fa-heart"></i> 
-</button>
+<form id="like-form-{{tweet.post_pk }}"mix-post="/api-toggle-like"  style="display: inline; margin: 0;">
+    <input type="hidden" name="post_pk" value="{{ tweet.post_pk }}">
+    <button type="submit" class="action like-btn">
+        <i class="fa-solid fa-heart"></i> 
+        <span class="like-count">{{ tweet.post_total_likes or 0}}</span>    
+    </button>
+</form>

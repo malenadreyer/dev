@@ -19,9 +19,9 @@
         
         <div class="post-actions">
             <!-- Comment -->
-            <button class="action comment-btn">
+            <button class="action comment-btn" onclick="toggleComments('{{ tweet.post_pk }}')">
                 <i class="fa-regular fa-comment"></i> 
-                <span class="comment-count">Comments</span>
+                <span id="comment-count-{{ tweet.post_pk }}">{{ tweet.post_comments or 0 }}</span>
             </button>
             
             <!-- Retweet -->
@@ -29,15 +29,12 @@
                 <i class="fa-solid fa-retweet"></i> 
                 <span>5</span>
             </button>
-    
            
-            <form mix-post="{{ url_for('api_like_post') }}"  style="display: inline; margin: 0;" >
-                <input type="hidden" name="post_pk" value="{{ tweet.post_pk }}">
-                <button type="submit"  class="action like-btn "  >
-                    <i class="fa-regular fa-heart"></i> 
-                    <span class="like-count">{{ tweet.post_total_likes or 0}}</span>
-                </button>
-            </form>
+            {% if tweet.post_total_likes %}
+            {% include "___button_like_tweet.html" %}
+        {% else %}
+            {% include "___button_unlike_tweet.html" %}
+        {% endif %}
         
 
             <!-- Stats -->
@@ -51,5 +48,59 @@
                 <i class="fa-solid fa-share"></i>
             </button>
         </div>
+        <div id="comments-section-{{ tweet.post_pk }}" class="comments-section" style="display: none;">
+            <!-- Comment form -->
+            <div class="comment-form-wrapper" style="padding: 15px; border-bottom: 1px solid #eee;">
+                <form mix-post="/api-create-comment" style="display: flex; gap: 10px; align-items: start;">
+                    <img src="{{ url_for('static', filename='uploads/'~(user.user_avatar_path if user.user_avatar_path else 'unknown.jpg')) }}" 
+                         alt="Your avatar" class="w-8 h-8 rounded-full" style="flex-shrink: 0;">
+                    <input type="hidden" name="post_pk" value="{{ tweet.post_pk }}">
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                        <textarea name="comment_message" placeholder="Write a comment..." 
+                                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 20px; float: right;"
+                                  rows="2"
+                                  maxlength="250"></textarea>
+                        <button type="submit" 
+                        style="
+                        align-self: flex-end; 
+                        background: #1da1f2; 
+                        color: white;  
+                        padding: 8px 20px; 
+                        border-radius: 20px; 
+                        font-weight: bold; 
+                        cursor: pointer; 
+                        z-index: 999; 
+                        position: relative;
+                    ">
+                            Comment
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div id="comments-{{ tweet.post_pk }}" class="comments-list">
+                <!-- Existing comments vil blive loadet her -->
+            </div>
     </div>
 </article>
+
+<script>
+    function toggleComments(postPk) {
+        const section = document.getElementById('comments-section-' + postPk);
+        const commentsList = document.getElementById('comments-' + postPk);
+        
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            
+            // Load comments hvis listen er tom
+            if (commentsList.children.length === 0) {
+                fetch('/api-get-comments?post_pk=' + postPk)
+                    .then(response => response.text())
+                    .then(html => {
+                        commentsList.innerHTML = html;
+                    });
+            }
+        } else {
+            section.style.display = 'none';
+        }
+    }
+    </script>

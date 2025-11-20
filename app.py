@@ -214,7 +214,7 @@ def home():
         user = session.get("user", "")
         if not user: return redirect(url_for("login"))
         db, cursor = x.db()
-        q = "SELECT * FROM users JOIN posts ON user_pk = post_user_fk ORDER BY RAND() LIMIT 5"
+        q = "SELECT * FROM users JOIN posts ON user_pk = post_user_fk "
         cursor.execute(q)
         tweets = cursor.fetchall()
         ic(tweets)
@@ -296,11 +296,9 @@ def home_comp():
                 users.user_last_name,
                 users.user_username,
                 users.user_avatar_path,
-                CASE WHEN likes.like_pk IS NOT NULL THEN 1 ELSE 0 END as user_has_liked
             FROM posts
             JOIN users ON posts.post_user_fk = users.user_pk
             LEFT JOIN likes ON posts.post_pk = likes.like_post_fk AND likes.like_user_fk = %s
-            ORDER BY posts.post_created_at DESC
             LIMIT 20
         """
         cursor.execute(q, (user["user_pk"],))
@@ -721,99 +719,260 @@ def forgot_password_page():
 
 
 ##################################################
-@app.route("/api-like-post", methods=["POST"])
-def api_like_post():
- 
-    if request.method == "POST":
-        try:
-            user = session.get("user", "")
-            if not user: return "Unauthorized", 401
+@app.route("/api-toggle-like", methods=["POST"])
+def api_toggle_like():
+    try:
+        user = session.get("user", "")
+        if not user: 
+            return "Unauthorized", 401
+        
+        user_pk = user["user_pk"]
+        post_pk = request.form.get("post_pk", "").strip()
+        
+        if not post_pk:
+            return "Invalid post", 400
+        
+        db, cursor = x.db()
+        
+        # Tjek om like eksisterer
+        q_check = "SELECT * FROM likes WHERE like_user_fk = %s AND like_post_fk = %s"
+        cursor.execute(q_check, (user_pk, post_pk))
+        existing = cursor.fetchone()
+        
+        if existing:
+            # Unlike - slet
+            q = "DELETE FROM likes WHERE like_user_fk = %s AND like_post_fk = %s"
+            cursor.execute(q, (user_pk, post_pk))
+            db.commit()
             
-            user_pk = user["user_pk"]
-            post_pk = request.form.get("post_pk", "").strip()
+            # Tæl likes direkte
+            q_count = "SELECT COUNT(*) as total FROM likes WHERE like_post_fk = %s"
+            cursor.execute(q_count, (post_pk,))
+            result = cursor.fetchone()
+            total_likes = result["total"]
+            
+            # Return like knappen (tomt hjerte)
+            button = render_template("___button_unlike_tweet.html", tweet={"post_pk": post_pk, "post_total_likes": total_likes})
+        else:
+            # Like - opret
             like_pk = uuid.uuid4().hex 
-            like_created_at = datetime.now()
+            like_created_at = int(time.time())
+            
             q = "INSERT INTO likes VALUES(%s, %s, %s, %s)"
-            db, cursor = x.db()
             cursor.execute(q, (like_pk, user_pk, post_pk, like_created_at))
             db.commit()
-            ic(ex)
-
-            return "error"
-        except Exception as ex:
-            ic(ex)
-            return "error"
+            
+            # Tæl likes direkte
+            q_count = "SELECT COUNT(*) as total FROM likes WHERE like_post_fk = %s"
+            cursor.execute(q_count, (post_pk,))
+            result = cursor.fetchone()
+            total_likes = result["total"]
+            
+            # Return unlike knappen (fyldt hjerte)
+            button = render_template("___button_like_tweet.html", tweet={"post_pk": post_pk, "post_total_likes": total_likes})
         
-        finally:
-            if "cursor" in locals(): cursor.close()
-            if "db" in locals(): db.close()
+        return f"""<mixhtml mix-replace="#like-form-{post_pk}">{button}</mixhtml>"""
 
-
+    except Exception as ex:
+        ic(ex)  
+        if "db" in locals(): 
+            db.rollback()
+        return "error", 500
+                    
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
 
 ################################################
-# @app.post("/api-add-comment")
-# def api_add_comment():
-#     try:
-#         user = session.get("user", "")
-#         if not user: 
-#             return "Unauthorized", 401
-        
-#         post_pk = request.form.get("post_pk", "").strip()
-#         comment_message = request.form.get("comment_message", "").strip()
-        
-#         if not post_pk or not comment_message:
-#             return "Invalid data", 400
-        
-#         if len(comment_message) < 1 or len(comment_message) > 280:
-#             return "Comment must be 1-280 characters", 400
-        
-#         db, cursor = x.db()
-        
-#         comment_pk = uuid.uuid4().hex
-#         comment_created_at = int(time.time())
-        
-#         q = "INSERT INTO comments VALUES(%s, %s, %s, %s, %s)"
-#         cursor.execute(q, (comment_pk, user["user_pk"], post_pk, comment_message, comment_created_at))
-#         db.commit()
-        
-#         # Hent opdateret antal comments
-#         q = "SELECT post_comments FROM posts WHERE post_pk = %s"
-#         cursor.execute(q, (post_pk,))
-#         post = cursor.fetchone()
-        
-#         toast_ok = render_template("___toast_ok.html", message="Comment added!")
-#         return f"""
-#             <browser mix-bottom="#toast">{toast_ok}</browser>
-#             <browser mix-update="[data-post-pk='{post_pk}'] .comment-count">{post['post_comments']}</browser>
-#         """, 200
-        
-#     except Exception as ex:
-#         ic(ex)
-#         return "Error", 500
-#     finally:
-#         if "cursor" in locals(): cursor.close()
-#         if "db" in locals(): db.close()
-
-@app.route("/api-get-post")
-def api_get_post():
+@app.route("/api-create-comment", methods=["POST"])
+def api_create_comment():
     try:
-        post_pk = request.args.get("post_pk", "")
-        if not post_pk: return "invalid post"
-
+        user = session.get("user", "")
+        if not user: 
+            return "Unauthorized", 401
+        
+        user_pk = user["user_pk"]
+        post_pk = request.form.get("post_pk", "").strip()
+        comment_message = x.validate_post(request.form.get("comment_message", "").strip())
+        
+        if not post_pk:
+            return "Invalid post", 400
+        
+        if not comment_message or len(comment_message) < 1:
+            return "Comment cannot be empty", 400
+        
         db, cursor = x.db()
-        q = "SELECT post_message FROM posts WHERE post_pk = %s"
+        
+        comment_pk = uuid.uuid4().hex 
+        comment_created_at = int(time.time())
+        
+        q = "INSERT INTO comments VALUES(%s, %s, %s, %s, %s)"
+        cursor.execute(q, (comment_pk, user_pk, post_pk, comment_message, comment_created_at))
+        db.commit()
+        
+        # Tæl comments direkte
+        q_count = "SELECT COUNT(*) as total FROM comments WHERE comment_post_fk = %s"
+        cursor.execute(q_count, (post_pk,))
+        result = cursor.fetchone()
+        total_comments = result["total"]
+        
+        # Hent comment med bruger info
+        q_get = """
+            SELECT comments.*, users.user_first_name, users.user_last_name, 
+                   users.user_username, users.user_avatar_path
+            FROM comments
+            JOIN users ON comments.comment_user_fk = users.user_pk
+            WHERE comments.comment_pk = %s
+        """
+        cursor.execute(q_get, (comment_pk,))
+        comment = cursor.fetchone()
+        
+        # Return den nye comment
+        comment_html = render_template("_comment.html", comment=comment, user=user)
+        return f"""
+            <mixhtml mix-top="#comments-{post_pk}">{comment_html}</mixhtml>
+            <mixhtml mix-replace="#comment-count-{post_pk}"><span id="comment-count-{post_pk}">{total_comments}</span></mixhtml>
+        """
+
+    except Exception as ex:
+        ic(ex)  
+        if "db" in locals(): 
+            db.rollback()
+        return "error", 500
+                    
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+###################################################
+@app.route("/api-delete-comment", methods=["POST"])
+def api_delete_comment():
+    try:
+        user = session.get("user", "")
+        if not user: 
+            return "Unauthorized", 401
+        
+        user_pk = user["user_pk"]
+        comment_pk = request.form.get("comment_pk", "").strip()
+        post_pk = request.form.get("post_pk", "").strip()
+        
+        if not comment_pk:
+            return "Invalid comment", 400
+        
+        db, cursor = x.db()
+        
+        # Tjek at det er brugerens egen comment
+        q_check = "SELECT * FROM comments WHERE comment_pk = %s AND comment_user_fk = %s"
+        cursor.execute(q_check, (comment_pk, user_pk))
+        comment = cursor.fetchone()
+        
+        if not comment:
+            return "Not your comment", 403
+        
+        # Slet comment
+        q = "DELETE FROM comments WHERE comment_pk = %s"
+        cursor.execute(q, (comment_pk,))
+        db.commit()
+        
+        # Tæl comments direkte
+        q_count = "SELECT COUNT(*) as total FROM comments WHERE comment_post_fk = %s"
+        cursor.execute(q_count, (post_pk,))
+        result = cursor.fetchone()
+        total_comments = result["total"]
+        
+        return f"""
+            <mixhtml mix-remove="#comment-{comment_pk}"></mixhtml>
+            <mixhtml mix-replace="#comment-count-{post_pk}"><span id="comment-count-{post_pk}">{total_comments}</span></mixhtml>
+        """
+
+    except Exception as ex:
+        ic(ex)  
+        if "db" in locals(): 
+            db.rollback()
+        return "error", 500
+                    
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+#############################################################
+@app.route("/api-get-comments", methods=["GET"])
+def api_get_comments():
+    try:
+        user = session.get("user", "")
+        if not user: 
+            return "Unauthorized", 401
+        
+        post_pk = request.args.get("post_pk", "").strip()
+        
+        if not post_pk:
+            return "Invalid post", 400
+        
+        db, cursor = x.db()
+        
+        # Hent alle comments for dette post
+        q = """
+            SELECT comments.*, 
+                   users.user_first_name, 
+                   users.user_last_name, 
+                   users.user_username, 
+                   users.user_avatar_path
+            FROM comments
+            JOIN users ON comments.comment_user_fk = users.user_pk
+            WHERE comments.comment_post_fk = %s
+            ORDER BY comments.comment_created_at DESC
+        """
         cursor.execute(q, (post_pk,))
-        post = cursor.fetchone()
-
-        if not post:
-            return "post not found"
-
-        return post["post_message"]
+        comments = cursor.fetchall()
+        
+        if not comments:
+            return '<p style="padding: 20px; text-align: center; color: #666;">No comments yet. Be the first to comment!</p>'
+        
+        # Render alle comments
+        html = ""
+        for comment in comments:
+            html += render_template("_comment.html", comment=comment, user=user)
+        
+        return html
 
     except Exception as ex:
         ic(ex)
-        return "system error", 500
-
+        return "error", 500
+                    
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+###########################################################################
+@app.get("/api-my-posts")
+@x.no_cache
+def api_my_posts():
+    try:
+        user = session.get("user", "")
+        if not user: 
+            return "Unauthorized", 401
+        
+        db, cursor = x.db()
+        
+        q = """
+                SELECT 
+                posts.*,
+                users.user_first_name,
+                users.user_last_name,
+                users.user_username,
+                users.user_avatar_path
+            FROM posts 
+            JOIN users ON posts.post_user_fk = users.user_pk
+            WHERE posts.post_user_fk = %s 
+            
+        """
+        cursor.execute(q, (user["user_pk"],))
+        posts = cursor.fetchall()
+        
+        return render_template("_my_posts.html", posts=posts, user=user)
+        
+    except Exception as ex:
+        ic(ex)
+        return "error", 500
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()

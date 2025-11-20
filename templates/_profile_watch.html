@@ -69,35 +69,8 @@
     </div>
 
     <!-- Posts placeholder -->
-    <div class="profile-posts">
-
-        {% if posts|length == 0 %}
-            <div class="no-posts">
-                <i class="fa-regular fa-comment"></i>
-                <p>No posts yet</p>
-            </div>
-        {% endif %}
-
-        {% for post in posts %}
-        <div class="post" data-post-pk="{{ post.post_pk }}">
-
-            <!-- Post tekst -->
-            <div class="post-text">
-                {{ post.post_message }}
-            </div>
-
-            <!-- Edit knap -->
-            <button class="edit-btn"
-                    mix-get="/api-get-post?post_pk={{ post.post_pk }}"
-                    mix-target="#edit_modal .edit-text"
-                    mix-put="#edit_modal input[name='post_pk']:{ value: '{{ post.post_pk }}' }"
-                    mix-on-success-show="#edit_modal">
-                <i class="fa-regular fa-pen-to-square"></i> Edit
-            </button>
-
-        </div>
-        {% endfor %}
-
+    <div class="profile-posts" mix-get="/api-my-posts" mix-run="load">
+        {% include "_my_posts.html"%}
     </div>
 </div>
 

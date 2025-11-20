@@ -258,9 +258,9 @@ p{
           font-size: 0.9rem;
 
           .action {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
             cursor: pointer;
             padding: 0.3rem;
             border-radius: 50%;
@@ -275,7 +275,13 @@ p{
       }
     }
   }
+.action i {
+    pointer-events: none; /* Sørg for at klik går gennem ikonet til knappen */
+}
 
+.action span {
+    pointer-events: none; /* Sørg for at klik går gennem teksten til knappen */
+}
   aside {
     grid-column: 3 / 4;
     margin: 1rem 2rem 1rem 1rem;
@@ -943,4 +949,18 @@ p{
 .save-btn, .cancel-btn {
   padding: 8px 16px;
   border-radius: 8px;
+}
+.comments-section {
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  background: #f7f9fa;
+}
+
+.comments-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.comment:hover {
+  background: #f0f0f0;
 }
