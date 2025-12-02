@@ -9,14 +9,7 @@
         <div class="post-text">
             {{ post.post_message }}
         </div>
-        
-        <button class="edit-btn"
-                mix-get="/api-get-post?post_pk={{ post.post_pk }}"
-                mix-target="#edit_modal .edit-text"
-                mix-put="#edit_modal input[name='post_pk']:{ value: '{{ post.post_pk }}' }"
-                mix-on-success-show="#edit_modal">
-            <i class="fa-regular fa-pen-to-square"></i> Edit
-        </button>
+    
     </div>
     {% endfor %}
 {% endif %}

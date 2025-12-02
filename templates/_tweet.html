@@ -8,6 +8,16 @@
                 {{ tweet.user_last_name }}
             </span>
             <span class="handle">@{{ tweet.user_username }}</span> · <span class="time">1d</span>
+            
+            <!-- Delete button - kun synlig for post ejeren -->
+            {% if user and user.user_pk == tweet.post_user_fk %}
+            <form action="/api-delete-post/{{ tweet.post_pk }}" mix-delete style="display:inline; margin-left: auto;" 
+                mix-delay="3000" mix-await="deleting_post...">
+                <button type="submit" class="action text-c-red" hover="cursor-pointer">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </form>
+            {% endif %}
         </div>
         <p class="text">
             {{ tweet.post_message }}
@@ -51,27 +61,17 @@
         <div id="comments-section-{{ tweet.post_pk }}" class="comments-section" style="display: none;">
             <!-- Comment form -->
             <div class="comment-form-wrapper" style="padding: 15px; border-bottom: 1px solid #eee;">
-                <form mix-post="/api-create-comment" style="display: flex; gap: 10px; align-items: start;">
+                <form mix-post="/api-create-comment" style="display: flex; gap: 10px;">
                     <img src="{{ url_for('static', filename='uploads/'~(user.user_avatar_path if user.user_avatar_path else 'unknown.jpg')) }}" 
                          alt="Your avatar" class="w-8 h-8 rounded-full" style="flex-shrink: 0;">
                     <input type="hidden" name="post_pk" value="{{ tweet.post_pk }}">
                     <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
                         <textarea name="comment_message" placeholder="Write a comment..." 
-                                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 20px; float: right;"
+                                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 20px;"
                                   rows="2"
                                   maxlength="250"></textarea>
                         <button type="submit" 
-                        style="
-                        align-self: flex-end; 
-                        background: #1da1f2; 
-                        color: white;  
-                        padding: 8px 20px; 
-                        border-radius: 20px; 
-                        font-weight: bold; 
-                        cursor: pointer; 
-                        z-index: 999; 
-                        position: relative;
-                    ">
+                        style="background: #1da1f2; color: white; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;">
                             Comment
                         </button>
                     </div>
@@ -80,6 +80,7 @@
             <div id="comments-{{ tweet.post_pk }}" class="comments-list">
                 <!-- Existing comments vil blive loadet her -->
             </div>
+        </div>
     </div>
 </article>
 

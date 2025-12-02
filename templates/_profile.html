@@ -39,6 +39,15 @@
         Update profile
     </button>
 </form>
+<div class="py-8 d-flex flex-col a-items-center">
+    <a href="/delete-profile" mix-get mix-target="#delete-dialog-container" class="text-c-red" hover="cursor-pointer">
+        Delete account
+    </a>
+</div>
+<div id="delete-dialog-container"></div>
+
+
+
 
 <script>
  document.querySelector('#profileForm').addEventListener('submit', async function(e) {

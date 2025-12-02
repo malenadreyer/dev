@@ -1,0 +1,6 @@
+<form id="follow-btn-{{ following.user_pk }}" mix-post="/api-toggle-follow" style="display: inline;">
+    <input type="hidden" name="following_pk" value="{{ following.user_pk }}">
+    <button type="submit" style="background: #1da1f2; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer;">
+        Follow
+    </button>
+</form>

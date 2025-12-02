@@ -62,7 +62,8 @@ def global_variables():
     )
  
 
-##############################
+################ LOGIN ##############
+########################################################################################################################
 @app.route("/login", methods=["GET", "POST"])
 @app.route("/login/<lan>", methods=["GET", "POST"])
 @x.no_cache
@@ -127,9 +128,21 @@ def login(lan = "english"):
             if "db" in locals(): db.close()
 
 
+################# LOGOUT ####################
+@app.get("/logout")
+def logout():
+    try:
+        session.clear()
+        return redirect(url_for("login"))
+    except Exception as ex:
+        ic(ex)
+        return "error"
+    finally:
+        pass
 
 
-##############################
+############################ SIGN UP ################################
+############################################################
 @app.route("/signup", methods=["GET", "POST"])
 @app.route("/signup/<lan>", methods=["GET", "POST"])
 def signup(lan = "english"):
@@ -146,8 +159,6 @@ def signup(lan = "english"):
     x.default_language = lan
     dictionary.default_language = lan
   
-
-
     if request.method == "GET":
         return render_template("signup.html", lan=lan)
 
@@ -159,18 +170,45 @@ def signup(lan = "english"):
             user_username = x.validate_user_username(lan)
             user_first_name = x.validate_user_first_name(lan)
 
+            user_hashed_password = generate_password_hash(user_password)
+            
+            # Connect to the database
+            db, cursor = x.db()
+            
+            # Tjek om email allerede eksisterer
+            q_check = "SELECT * FROM users WHERE user_email = %s"
+            cursor.execute(q_check, (user_email,))
+            existing_user = cursor.fetchone()
+            
+            if existing_user:
+                # Hvis kontoen er soft deleted, genaktiver den
+                if existing_user["user_deleted_at"] != 0:
+                    import time
+                    q_reactivate = """UPDATE users 
+                                     SET user_deleted_at = 0, 
+                                         user_password = %s,
+                                         user_username = %s,
+                                         user_first_name = %s
+                                     WHERE user_email = %s"""
+                    cursor.execute(q_reactivate, (user_hashed_password, user_username, user_first_name, user_email))
+                    db.commit()
+                    
+                    # Redirect til login
+                    return f"""<mixhtml mix-redirect="{ url_for('login') }"></mixhtml>""", 200
+                else:
+                    # Email er allerede i brug af en aktiv konto
+                    toast_error = render_template("___toast_error.html", message="Email already registered")
+                    return f"""<mixhtml mix-update="#toast">{ toast_error }</mixhtml>""", 400
+            
+            # Hvis email ikke findes, opret ny bruger
             user_pk = uuid.uuid4().hex
             user_last_name = ""
             user_avatar_path = ""
             user_verification_key = uuid.uuid4().hex
             user_verified_at = 0
             user_deleted_at = 0
-
-            user_hashed_password = generate_password_hash(user_password)
-
-            # Connect to the database
+            
             q = "INSERT INTO users VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s,%s)"
-            db, cursor = x.db()
             cursor.execute(q, (user_pk, user_email, user_hashed_password, user_username, 
             user_first_name, user_last_name, user_avatar_path, user_verification_key, user_verified_at, user_deleted_at))
             db.commit()
@@ -180,7 +218,8 @@ def signup(lan = "english"):
             ic(email_verify_account)
             x.send_email(user_email, "Verify your account", email_verify_account)
 
-            return f"""<mixhtml mix-redirect="{ url_for('login') }"></mixhtml>""", 400
+            return f"""<mixhtml mix-redirect="{ url_for('login') }"></mixhtml>""", 200
+            
         except Exception as ex:
             ic(ex)
             # User errors
@@ -204,9 +243,96 @@ def signup(lan = "english"):
             if "cursor" in locals(): cursor.close()
             if "db" in locals(): db.close()
 
+############################## FORGOT PASSWORD ##############################
+@app.post("/forgot-password")
+def forgot_password():
+    try:
+        user_email = request.form.get("user_email").strip()
+        if not user_email:
+            raise Exception("Email is required", 400)
+
+        # Fetch user by email
+        db, cursor = x.db()
+        q = "SELECT user_pk FROM users WHERE user_email = %s AND user_deleted_at = 0"
+        cursor.execute(q, (user_email,))
+        user = cursor.fetchone()
+
+        if not user:
+            raise Exception ("User not found", 400)
+
+        # Generate a reset token
+        reset_token = str(uuid.uuid4())
+        
+        
+
+        # Store the reset token in the database
+        q = "UPDATE users SET user_verification_key = %s WHERE user_pk = %s"
+        cursor.execute(q, (reset_token, user["user_pk"]))
+        db.commit()
+
+        # Send the reset email (pass only the reset token)
+        x.send_reset_email(user_email, reset_token)
+
+        toast = render_template("___toast_ok.html", message= "A reset link has been to your email.")
+        return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 200
+
+    except Exception as ex:
+        if "db" in locals(): db.rollback()
+        
+        message = ex.args[0] if len(ex.args) > 0 else "Error occurred"
+        toast = render_template("___toast_error.html", message=message)
+        return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 400
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
 
 
-##############################
+################################RESET PASSWORD ################################
+@app.route("/reset-password", methods=["POST"])
+def reset_password_post():
+    #TODO: Make sure that you can only reset your password ones, 
+    # or at least get a message if you should do it
+    try:
+        token = request.form.get("token", "")
+        new_password = request.form.get("user_password", "").strip()
+
+        if not token or not new_password:
+            return "Missing data", 400
+    
+        new_password = x.validate_user_password()
+
+        db, cursor = x.db()
+        cursor.execute("SELECT user_pk FROM users WHERE user_verification_key = %s", (token,))
+        user = cursor.fetchone()
+        if not user:
+            return "Invalid token", 400
+
+    # Gem ny kode og nulstil token
+        hashed = generate_password_hash(new_password)
+        cursor.execute(
+            "UPDATE users SET user_password = %s, user_verification_key = '' WHERE user_pk = %s",
+            (hashed, user["user_pk"])
+        )
+        db.commit()
+        toast = render_template("___toast_ok.html", message="Password updated successfully")
+        return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 200
+
+    except Exception as ex:
+        message = ex.args[0] if len(ex.args) > 0 else "System error"
+        toast = render_template("___toast_error.html", message=message)
+        return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 400
+
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+###############################FORGOT PASSWORD ################################
+@app.route("/forgot-password", methods=["GET"])
+def forgot_password_page():
+    return render_template("forgot_password.html")
+
+############################### HOME #########3######################
+##########################################################################################
 @app.get("/home")
 @x.no_cache
 def home():
@@ -266,20 +392,6 @@ def verify_account():
         if "db" in locals(): db.close()
 
 ##############################
-@app.get("/logout")
-def logout():
-    try:
-        session.clear()
-        return redirect(url_for("login"))
-    except Exception as ex:
-        ic(ex)
-        return "error"
-    finally:
-        pass
-
-
-
-##############################
 @app.get("/home-comp")
 @x.no_cache
 def home_comp():
@@ -317,7 +429,8 @@ def home_comp():
         if "db" in locals(): db.close()
 
 
-##############################
+############################################PROFILE##############################################
+##########################################################################################
 @app.get("/profile")
 def profile():
     try:
@@ -368,26 +481,9 @@ def profile_watch():
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()  
 
-##############################
-# @app.patch("/like-tweet")
-# @x.no_cache
-# def api_like_tweet():
-#     try:
-#         button_unlike_tweet = render_template("___button_unlike_tweet.html")
-#         return f"""
-#             <mixhtml mix-replace="#button_1">
-#                 {button_unlike_tweet}
-#             </mixhtml>
-#         """
-#     except Exception as ex:
-#         ic(ex)
-#         return "error"
-#     finally:
-#         if "cursor" in locals(): cursor.close()
-#         if "db" in locals(): db.close()
 
-
-##############################
+############################## CREATE POST ##############################
+################################################################
 @app.route("/api-create-post", methods=["POST"])
 def api_create_post():
     try:
@@ -434,7 +530,7 @@ def api_create_post():
 
 
 
-##############################
+############################## UPDATE PROFIL ###################################################
 @app.route("/api-update-profile", methods=["POST"])
 def api_update_profile():
 
@@ -506,34 +602,70 @@ def api_update_profile():
         if "db" in locals(): db.close()
 
 
-# ##############################
-# @app.post("/api-search")
-# def api_search():
-#     try:
-#         # TODO: The input search_for must be validated
-#         search_for = request.form.get("search_for", "")
-#         if not search_for:
-#             return """
-#             <browser mix-remove="#search_results"></browser>
-#             """
-#         part_of_query = f"%{search_for}%"
-#         ic(search_for)
-#         db, cursor = x.db()
-#         q = "SELECT * FROM users WHERE user_username LIKE %s"
-#         cursor.execute(q, (part_of_query,))
-#         users = cursor.fetchall()
-#         orange_box = render_template("_orange_box.html", users=users)
-#         return f"""
-#             <browser mix-remove="#search_results"></browser>
-#             <browser mix-bottom="#search_form">{orange_box}</browser>
-#         """
-#     except Exception as ex:
-#         ic(ex)
-#         return str(ex)
-#     finally:
-#         if "cursor" in locals(): cursor.close()
-#         if "db" in locals(): db.close()
 
+
+
+############### DELETE PROFILE ###############
+@app.route("/delete-profile", methods=["GET"])
+def delete_profile():
+    try:
+        user = session.get("user")
+
+        # Check if user is logged in
+        if not user: 
+            return "error"
+        
+        # Fetch fresh user data from database
+        q = "SELECT * FROM users WHERE user_pk = %s"
+        db, cursor = x.db()
+        cursor.execute(q, (user["user_pk"],))
+        row = cursor.fetchone()
+
+        # Render delete profile template
+        delete_profile_html = render_template("___delete_profile.html", row=row)
+        return f"""<browser mix-top="main">{ delete_profile_html }</browser>"""
+
+    except Exception as ex:
+        ic(ex)
+        return "error"
+    
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+############## API DELETE PROFILE ################
+@app.route("/api-delete-profile", methods=["DELETE"])
+def api_delete_profile():
+    try:
+        # Hent user fra session
+        user = session.get("user")
+        
+        if not user: 
+            return "invalid user", 401
+        
+        # Soft delete - set deleted timestamp
+        from datetime import datetime
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Format til MySQL
+        q = "UPDATE users SET user_deleted_at = %s WHERE user_pk = %s"
+        db, cursor = x.db()
+        cursor.execute(q, (now, user["user_pk"]))
+        db.commit()
+
+        # Clear session
+        session.clear()
+
+        # Redirect to index page
+        return f"""<browser mix-redirect="/"></browser>"""
+    
+    except Exception as ex:
+        ic(ex)
+        if "db" in locals(): db.rollback()
+        toast_error = render_template("___toast_error.html", message="System under maintenance")
+        return f"""<browser mix-bottom="#toast">{toast_error}</browser>""", 500
+    
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
 
 ##############################
 @app.post("/api-search")
@@ -606,89 +738,6 @@ def get_data_from_sheet():
     finally:
         pass
 
-    ##############################
-@app.post("/forgot-password")
-def forgot_password():
-    try:
-        user_email = request.form.get("user_email").strip()
-        if not user_email:
-            raise Exception("Email is required", 400)
-
-        # Fetch user by email
-        db, cursor = x.db()
-        q = "SELECT user_pk FROM users WHERE user_email = %s AND user_deleted_at = 0"
-        cursor.execute(q, (user_email,))
-        user = cursor.fetchone()
-
-        if not user:
-            raise Exception ("User not found", 400)
-
-        # Generate a reset token
-        reset_token = str(uuid.uuid4())
-        
-        
-
-        # Store the reset token in the database
-        q = "UPDATE users SET user_verification_key = %s WHERE user_pk = %s"
-        cursor.execute(q, (reset_token, user["user_pk"]))
-        db.commit()
-
-        # Send the reset email (pass only the reset token)
-        x.send_reset_email(user_email, reset_token)
-
-        toast = render_template("___toast_ok.html", message= "A reset link has been to your email.")
-        return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 200
-
-    except Exception as ex:
-        if "db" in locals(): db.rollback()
-        
-        message = ex.args[0] if len(ex.args) > 0 else "Error occurred"
-        toast = render_template("___toast_error.html", message=message)
-        return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 400
-    finally:
-        if "cursor" in locals(): cursor.close()
-        if "db" in locals(): db.close()
-
-########################################
-@app.route("/reset-password", methods=["POST"])
-def reset_password_post():
-    #TODO: Make sure that you can only reset your password ones, 
-    # or at least get a message if you should do it
-    try:
-        token = request.form.get("token", "")
-        new_password = request.form.get("user_password", "").strip()
-
-        if not token or not new_password:
-            return "Missing data", 400
-    
-        new_password = x.validate_user_password()
-
-        db, cursor = x.db()
-        cursor.execute("SELECT user_pk FROM users WHERE user_verification_key = %s", (token,))
-        user = cursor.fetchone()
-        if not user:
-            return "Invalid token", 400
-
-    # Gem ny kode og nulstil token
-        hashed = generate_password_hash(new_password)
-        cursor.execute(
-            "UPDATE users SET user_password = %s, user_verification_key = '' WHERE user_pk = %s",
-            (hashed, user["user_pk"])
-        )
-        db.commit()
-        toast = render_template("___toast_ok.html", message="Password updated successfully")
-        return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 200
-
-    except Exception as ex:
-        message = ex.args[0] if len(ex.args) > 0 else "System error"
-        toast = render_template("___toast_error.html", message=message)
-        return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 400
-
-    finally:
-        if "cursor" in locals(): cursor.close()
-        if "db" in locals(): db.close()
-
-
 ########################################
 @app.route("/reset-password", methods=["GET"])
 def reset_password_page():
@@ -711,10 +760,6 @@ def reset_password_page():
         cursor.close()
         db.close()
 
-###############################################
-@app.route("/forgot-password", methods=["GET"])
-def forgot_password_page():
-    return render_template("forgot_password.html")
 
 
 
@@ -943,42 +988,77 @@ def api_get_comments():
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
 ###########################################################################
-@app.get("/api-my-posts")
-@x.no_cache
-def api_my_posts():
+################################ POSTS ####################################
+@app.route("/my-posts", methods=["GET"])
+def my_posts():
     try:
-        user = session.get("user", "")
-        if not user: 
-            return "Unauthorized", 401
+        user = session.get("user")
         
+        if not user:
+            return "unauthorized", 401
+        
+        q = "SELECT * FROM posts WHERE post_user_fk = %s"
         db, cursor = x.db()
-        
-        q = """
-                SELECT 
-                posts.*,
-                users.user_first_name,
-                users.user_last_name,
-                users.user_username,
-                users.user_avatar_path
-            FROM posts 
-            JOIN users ON posts.post_user_fk = users.user_pk
-            WHERE posts.post_user_fk = %s 
-            
-        """
         cursor.execute(q, (user["user_pk"],))
         posts = cursor.fetchall()
         
-        return render_template("_my_posts.html", posts=posts, user=user)
+        return render_template("_my_posts.html", posts=posts)
         
     except Exception as ex:
         ic(ex)
         return "error", 500
+    
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
 
-##################################################
-
+########################### API DELETE POST ###########################
+############## API DELETE POST ################
+@app.route("/api-delete-post/<post_pk>", methods=["DELETE"])
+def api_delete_post(post_pk):
+    try:
+        # Hent user fra session
+        user = session.get("user")
+        
+        if not user: 
+            return "unauthorized", 401
+        
+        db, cursor = x.db()
+        
+        # Tjek at brugeren ejer posten
+        q_check = "SELECT * FROM posts WHERE post_pk = %s AND post_user_fk = %s"
+        cursor.execute(q_check, (post_pk, user["user_pk"]))
+        post = cursor.fetchone()
+        
+        if not post:
+            return "Post not found or unauthorized", 404
+        
+        # Slet alle comments på posten først (foreign key constraint)
+        q_delete_comments = "DELETE FROM comments WHERE comment_post_fk = %s"
+        cursor.execute(q_delete_comments, (post_pk,))
+        
+        # Slet alle likes på posten
+        q_delete_likes = "DELETE FROM likes WHERE like_post_fk = %s"
+        cursor.execute(q_delete_likes, (post_pk,))
+        
+        # Slet posten
+        q_delete = "DELETE FROM posts WHERE post_pk = %s"
+        cursor.execute(q_delete, (post_pk,))
+        db.commit()
+        
+        # Fjern post elementet fra DOM
+        return f"""<browser mix-remove="[data-post-pk='{post_pk}']"></browser>"""
+    
+    except Exception as ex:
+        ic(ex)
+        if "db" in locals(): db.rollback()
+        toast_error = render_template("___toast_error.html", message="Could not delete post")
+        return f"""<browser mix-bottom="#toast">{toast_error}</browser>""", 500
+    
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+########################################################
 @app.route("/api-edit-post", methods=["POST"])
 def api_edit_post():
     try:
@@ -1026,3 +1106,157 @@ def api_edit_post():
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
+######################### FOLLOWERS AND FOLLOWING ###########################
+@app.route("/api-toggle-follow", methods=["POST"])
+def api_toggle_follow():
+    try:
+        user = session.get("user", "")
+        if not user: 
+            return "Unauthorized", 401
+        
+        user_pk = user["user_pk"]  # Den der følger
+        following_pk = request.form.get("following_pk", "").strip()  # Den der skal følges
+        
+        if not following_pk:
+            return "Invalid user", 400
+        
+        if user_pk == following_pk:
+            return "Cannot follow yourself", 400
+        
+        db, cursor = x.db()
+        
+        # Tjek om allerede følger
+        q_check = "SELECT * FROM follows WHERE follow_follower_fk = %s AND follow_following_fk = %s"
+        cursor.execute(q_check, (user_pk, following_pk))
+        existing = cursor.fetchone()
+        
+        if existing:
+            # Unfollow
+            q = "DELETE FROM follows WHERE follow_follower_fk = %s AND follow_following_fk = %s"
+            cursor.execute(q, (user_pk, following_pk))
+            db.commit()
+            
+            # Hent opdateret følger-tal
+            q_count = "SELECT user_followers, user_following FROM users WHERE user_pk = %s"
+            cursor.execute(q_count, (following_pk,))
+            user_data = cursor.fetchone()
+            
+            # Return follow knappen
+            button = render_template("___button_follow.html", following={"user_pk": following_pk, "user_followers": user_data["user_followers"]})
+        else:
+            # Follow
+            follow_pk = uuid.uuid4().hex 
+            follow_created_at = int(time.time())
+            
+            q = "INSERT INTO follows VALUES(%s, %s, %s, %s)"
+            cursor.execute(q, (follow_pk, user_pk, following_pk, follow_created_at))
+            db.commit()
+            
+            # Hent opdateret følger-tal
+            q_count = "SELECT user_followers, user_following FROM users WHERE user_pk = %s"
+            cursor.execute(q_count, (following_pk,))
+            user_data = cursor.fetchone()
+            
+            # Return unfollow knappen
+            button = render_template("___button_unfollow.html", following={"user_pk": following_pk, "user_followers": user_data["user_followers"]})
+        
+        return f"""<mixhtml mix-replace="#follow-btn-{following_pk}">{button}</mixhtml>"""
+
+    except Exception as ex:
+        ic(ex)
+        if "db" in locals(): 
+            db.rollback()
+        return "error", 500
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+
+#################################################################
+############################ ADMIN ##############################
+@app.get("/admin")
+def view_admin():
+    try:
+        
+        db, cursor = x.db()
+        q = "SELECT * FROM users"
+        cursor.execute(q)
+        rows = cursor.fetchall()
+
+        admin_html = render_template("_admin.html", rows=rows)
+        return f"""<browser mix-update="main">{ admin_html }</browser>"""
+    except Exception as ex:
+        ic(ex)
+        return "error"
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+        ############# ADMIN-BLOCK-USER #################
+@app.post("/admin-block-user/<user_pk>")
+def admin_block_user(user_pk):
+    try:
+        db, cursor = x.db()
+        q = "UPDATE users SET user_is_blocked = NOT user_is_blocked WHERE user_pk = %s"
+        cursor.execute(q, (user_pk,))
+        db.commit()
+
+        q = "SELECT * FROM users WHERE user_pk = %s"
+        cursor.execute(q, (user_pk,))
+        row = cursor.fetchone()
+        ic(row)
+
+        user_email = row["user_email"]
+
+        
+        email_user_is_blocked = render_template("_email_user_is_blocked.html")
+        email_user_is_unblocked = render_template("_email_user_is_unblocked.html")
+        
+        if row["user_is_blocked"]:
+            x.send_email(user_email=user_email, subject="You have been blocked from X", template=email_user_is_blocked)
+        else:
+            x.send_email(user_email=user_email, subject="You have been unblocked from X", template=email_user_is_unblocked)     
+
+        block_unblock_html = render_template("___block_unblock_user.html", row=row)
+        return f"""<browser mix-replace="#block_unblock_user_{user_pk}">{block_unblock_html}</browser>"""
+    except Exception as ex:
+        ic(ex)
+        return "error"
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+
+############# ADMIN-BLOCK-POST #################
+@app.post("/admin-block-post/<post_pk>")
+def admin_block_post(post_pk):
+    try:
+       db, cursor = x.db()
+       q = "UPDATE posts SET post_is_blocked = NOT post_is_blocked WHERE post_pk = %s"
+       cursor.execute(q, (post_pk,))
+       db.commit()
+
+       q = "SELECT * FROM posts WHERE post_pk = %s"
+       cursor.execute(q, (post_pk,))
+       tweet = cursor.fetchone()
+
+       q = "SELECT * FROM users WHERE user_pk = %s"
+       cursor.execute(q, (tweet["post_user_fk"],))
+       row = cursor.fetchone()
+
+
+       user_email = row["user_email"]
+
+       email_post_is_blocked = render_template("_email_post_is_blocked.html")
+
+       if tweet["post_is_blocked"]:
+           x.send_email(user_email=user_email, subject="Your post has been blocked", template=email_post_is_blocked)
+
+       block_unblock_html = render_template("___block_unblock_post.html", tweet=tweet)
+       return f"""<browser mix-replace="#block_unblock_post_{post_pk}">{block_unblock_html}</browser>"""
+    except Exception as ex:
+        ic(ex)
+        return "error"
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close() 

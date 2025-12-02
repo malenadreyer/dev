@@ -1,0 +1,14 @@
+<div class="d-flex a-items-center dropdown-wrapper">
+    <img src="{{ url_for('static', filename='uploads/' ~ (row.user_avatar_path if row.user_avatar_path else 'unknown.jpg')) }}"
+        class="w-8 h-8 rounded-full" alt="Profile Picture">
+    <div class="w-full ml-2">
+        <p class="">
+            {{ row.user_first_name }} {{ row.user_last_name }}
+            <span class="text-c-gray:+20 text-70">@{{ row.user_username }}</span>
+        </p>
+
+
+    </div>
+    <button class="px-4 py-1 text-c-white bg-c-black rounded-lg">...</button>
+    {% include "___block_unblock_user.html" %}
+</div>

@@ -12,7 +12,7 @@
         <form mix-post="/api-delete-comment" style="display: inline;" type="submit">
             <input type="hidden" name="comment_pk" value="{{ comment.comment_pk }}">
             <input type="hidden" name="post_pk" value="{{ comment.comment_post_fk }}">
-            <button type="submit" style="color: #f91880; background: none; border: none; cursor: pointer; font-size: 12px;">
+            <button type="submit" style="color: #f91880; background: none; border: none; pointer-events: none; font-size: 12px;">
                 <i class="fa-solid fa-trash"></i> Delete
             </button>
         </form>

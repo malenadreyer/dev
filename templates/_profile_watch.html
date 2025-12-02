@@ -69,8 +69,11 @@
     </div>
 
     <!-- Posts placeholder -->
-    <div class="profile-posts" mix-get="/api-my-posts" mix-run="load">
-        {% include "_my_posts.html"%}
+    <div class="profile-posts" mix-get="/my-posts" mix-run="load">
+        
+    {% for post in posts: %}
+    {% include "_my_posts.html" %}
+    {% endfor %}
     </div>
 </div>
 

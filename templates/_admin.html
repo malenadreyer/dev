@@ -1,0 +1,10 @@
+<h1>
+    Admin panel
+</h1>
+
+<section>
+    <h2>All users</h2>
+    {% for row in rows: %}
+    {% include "_user.html" %}
+    {% endfor %}
+</section>
