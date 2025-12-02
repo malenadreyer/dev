@@ -69,49 +69,16 @@
     </div>
 
     <!-- Posts placeholder -->
-    <div class="profile-posts" mix-get="/my-posts" mix-run="load">
-        
-    {% for post in posts: %}
-    {% include "_my_posts.html" %}
+    {% if tweets|length == 0 %}
+    <div class="no-posts">
+        <i class="fa-regular fa-comment"></i>
+        <p>No posts yet</p>
+    </div>
+{% else %}
+    {% for tweet in tweets %}
+        {% include "_tweet.html" %}
     {% endfor %}
-    </div>
+{% endif %}
 </div>
 
-
-<!-- 🔥 EDIT MODAL -->
-<div id="edit_modal" class="edit-modal" style="display:none;">
-
-    <div class="edit-modal-content">
-
-        <h2>Edit Post</h2>
-
-        <form id="edit_form">
-
-            <!-- skjult post_pk -->
-            <input type="hidden" name="post_pk">
-
-            <!-- tekstfelt fyldes via mix-get -->
-            <textarea name="post" class="edit-text"></textarea>
-
-            <div class="modal-actions">
-                <button type="button"
-                        class="cancel-btn"
-                        mix-hide="#edit_modal">
-                    Cancel
-                </button>
-
-                <button type="submit"
-                        class="save-btn"
-                        mix-post="/api-edit-post"
-                        mix-form="#edit_form"
-                        mix-on-success-hide="#edit_modal">
-                    Save
-                </button>
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
 

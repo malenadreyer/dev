@@ -61,20 +61,23 @@
         <div id="comments-section-{{ tweet.post_pk }}" class="comments-section" style="display: none;">
             <!-- Comment form -->
             <div class="comment-form-wrapper" style="padding: 15px; border-bottom: 1px solid #eee;">
-                <form mix-post="/api-create-comment" style="display: flex; gap: 10px;">
-                    <img src="{{ url_for('static', filename='uploads/'~(user.user_avatar_path if user.user_avatar_path else 'unknown.jpg')) }}" 
-                         alt="Your avatar" class="w-8 h-8 rounded-full" style="flex-shrink: 0;">
+                <form mix-post="/api-create-comment" onsubmit="console.log('Form submitted!'); return true;">
                     <input type="hidden" name="post_pk" value="{{ tweet.post_pk }}">
-                    <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
-                        <textarea name="comment_message" placeholder="Write a comment..." 
-                                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 20px;"
-                                  rows="2"
-                                  maxlength="250"></textarea>
-                        <button type="submit" 
-                        style="background: #1da1f2; color: white; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;">
-                            Comment
-                        </button>
-                    </div>
+                    
+                    <textarea name="comment_message" 
+                              placeholder="Write a comment..." 
+                              style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 20px; resize: none; margin-bottom: 10px; display: block;"
+                              rows="2"
+                              maxlength="250"
+                              required></textarea>
+                    
+                              <button type="submit" 
+                              onclick="console.log('Button clicked!'); event.stopPropagation();"
+                              onmouseover="this.style.background='#1a91da'"
+                              onmouseout="this.style.background='#1da1f2'"
+                              style="background: #1da1f2; color: white; width:100%; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; display: block; margin-left: auto; transition: background 0.2s ease;">
+                          Comment
+                      </button>
                 </form>
             </div>
             <div id="comments-{{ tweet.post_pk }}" class="comments-list">

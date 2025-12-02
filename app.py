@@ -350,10 +350,18 @@ def home():
         trends = cursor.fetchall()
         ic(trends)
 
-        q = "SELECT * FROM users WHERE user_pk != %s ORDER BY RAND() LIMIT 3"
-        cursor.execute(q, (user["user_pk"],))
+        q = """
+            SELECT users.*, 
+                   (SELECT COUNT(*) FROM follows 
+                    WHERE follow_follower_fk = %s 
+                    AND follow_following_fk = users.user_pk) as is_following
+            FROM users 
+            WHERE user_pk != %s 
+            ORDER BY RAND() 
+            LIMIT 3
+        """
+        cursor.execute(q, (user["user_pk"], user["user_pk"]))
         suggestions = cursor.fetchall()
-        ic(suggestions)
 
         lan = session["user"]["user_language"]
 
@@ -419,6 +427,7 @@ def home_comp():
         lan = session["user"]["user_language"]
         
         home_html = render_template("_home_comp.html", dictionary=dictionary, lan=lan, tweets=tweets, user=user)
+        
         return f"""<browser mix-update="main">{home_html}</browser>"""
         
     except Exception as ex:
@@ -466,10 +475,26 @@ def profile_watch():
         cursor.execute(q, (user["user_pk"],))
         user = cursor.fetchone()
         
+        # Hent brugerens tweets (tilføj dette)
+        q_tweets = """
+            SELECT 
+                posts.*,
+                users.user_first_name,
+                users.user_last_name,
+                users.user_username,
+                users.user_avatar_path
+            FROM posts
+            JOIN users ON posts.post_user_fk = users.user_pk
+            WHERE posts.post_user_fk = %s
+        """
+        cursor.execute(q_tweets, (user["user_pk"],))
+        tweets = cursor.fetchall()
+        
         lan = session.get("user", {}).get("user_language", "english")
         
         profile_html = render_template("_profile_watch.html", 
                                       user=user, 
+                                      tweets=tweets, 
                                       dictionary=dictionary, 
                                       lan=lan)
         return f"""<browser mix-update="main">{profile_html}</browser>"""
@@ -479,7 +504,7 @@ def profile_watch():
         return "error"
     finally:
         if "cursor" in locals(): cursor.close()
-        if "db" in locals(): db.close()  
+        if "db" in locals(): db.close()
 
 
 ############################## CREATE POST ##############################
@@ -987,32 +1012,8 @@ def api_get_comments():
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
-###########################################################################
-################################ POSTS ####################################
-@app.route("/my-posts", methods=["GET"])
-def my_posts():
-    try:
-        user = session.get("user")
-        
-        if not user:
-            return "unauthorized", 401
-        
-        q = "SELECT * FROM posts WHERE post_user_fk = %s"
-        db, cursor = x.db()
-        cursor.execute(q, (user["user_pk"],))
-        posts = cursor.fetchall()
-        
-        return render_template("_my_posts.html", posts=posts)
-        
-    except Exception as ex:
-        ic(ex)
-        return "error", 500
-    
-    finally:
-        if "cursor" in locals(): cursor.close()
-        if "db" in locals(): db.close()
 
-########################### API DELETE POST ###########################
+##############################################################
 ############## API DELETE POST ################
 @app.route("/api-delete-post/<post_pk>", methods=["DELETE"])
 def api_delete_post(post_pk):
@@ -1106,72 +1107,64 @@ def api_edit_post():
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
+
+
 ######################### FOLLOWERS AND FOLLOWING ###########################
+############## API FOLLOW USER ################
+############## API FOLLOW USER ################
 @app.route("/api-toggle-follow", methods=["POST"])
 def api_toggle_follow():
     try:
         user = session.get("user", "")
         if not user: 
-            return "Unauthorized", 401
+            return "unauthorized", 401
         
-        user_pk = user["user_pk"]  # Den der følger
-        following_pk = request.form.get("following_pk", "").strip()  # Den der skal følges
+        following_pk = request.form.get("following_pk", "").strip()
         
         if not following_pk:
             return "Invalid user", 400
         
-        if user_pk == following_pk:
+        # Kan ikke følge sig selv
+        if user["user_pk"] == following_pk:
             return "Cannot follow yourself", 400
         
         db, cursor = x.db()
         
-        # Tjek om allerede følger
+        # Tjek om man allerede følger
         q_check = "SELECT * FROM follows WHERE follow_follower_fk = %s AND follow_following_fk = %s"
-        cursor.execute(q_check, (user_pk, following_pk))
-        existing = cursor.fetchone()
+        cursor.execute(q_check, (user["user_pk"], following_pk))
+        existing_follow = cursor.fetchone()
         
-        if existing:
+        if existing_follow:
             # Unfollow
             q = "DELETE FROM follows WHERE follow_follower_fk = %s AND follow_following_fk = %s"
-            cursor.execute(q, (user_pk, following_pk))
+            cursor.execute(q, (user["user_pk"], following_pk))
             db.commit()
             
-            # Hent opdateret følger-tal
-            q_count = "SELECT user_followers, user_following FROM users WHERE user_pk = %s"
-            cursor.execute(q_count, (following_pk,))
-            user_data = cursor.fetchone()
-            
-            # Return follow knappen
-            button = render_template("___button_follow.html", following={"user_pk": following_pk, "user_followers": user_data["user_followers"]})
+            # Returnér Follow knap
+            button = render_template("___button_follow.html", suggestion={"user_pk": following_pk})
         else:
             # Follow
-            follow_pk = uuid.uuid4().hex 
+            follow_pk = uuid.uuid4().hex
             follow_created_at = int(time.time())
             
             q = "INSERT INTO follows VALUES(%s, %s, %s, %s)"
-            cursor.execute(q, (follow_pk, user_pk, following_pk, follow_created_at))
+            cursor.execute(q, (follow_pk, user["user_pk"], following_pk, follow_created_at))
             db.commit()
             
-            # Hent opdateret følger-tal
-            q_count = "SELECT user_followers, user_following FROM users WHERE user_pk = %s"
-            cursor.execute(q_count, (following_pk,))
-            user_data = cursor.fetchone()
-            
-            # Return unfollow knappen
-            button = render_template("___button_unfollow.html", following={"user_pk": following_pk, "user_followers": user_data["user_followers"]})
+            # Returnér Following knap
+            button = render_template("___button_unfollow.html", suggestion={"user_pk": following_pk})
         
         return f"""<mixhtml mix-replace="#follow-btn-{following_pk}">{button}</mixhtml>"""
-
+    
     except Exception as ex:
         ic(ex)
-        if "db" in locals(): 
-            db.rollback()
+        if "db" in locals(): db.rollback()
         return "error", 500
+    
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
-
-
 #################################################################
 ############################ ADMIN ##############################
 @app.get("/admin")
