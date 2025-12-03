@@ -11,7 +11,10 @@ border-1 border-c-gray:+50 rounded-sm">
                 </p>
             
             </div>
-            <button class="px-4 py-1 text-c-white bg-c-black rounded-lg">Follow</button>
-        </div>
+            {% if user.is_following %}
+            {% include "___button_unfollow.html" with context %}
+        {% else %}
+            {% include "___button_follow.html" with context %}
+        {% endif %}        </div>
     {% endfor %}
 </div>

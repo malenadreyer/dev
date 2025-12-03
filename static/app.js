@@ -64,3 +64,5 @@ burger.addEventListener("click", () => {
   // toggle icon
   burger.classList.toggle("open");
 });
+
+

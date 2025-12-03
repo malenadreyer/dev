@@ -10,6 +10,12 @@
 
     <button type="submit" class="x-dialog__btn"  >Update picture</button>
     <div>
+        <label for="user_bio">
+        <span>Profil bio</span>{{ x.BIO_MIN }} to {{ x.BIO_MAX }}
+        </label>
+        <textarea name="user_bio" id="user_bio" mix-check="{{ x.REGEX_BIO }}" >{{ user.user_bio if user.user_bio else '' }}</textarea>
+    </div>
+    <div>
         <label for="user_email">
         <span>{{ dictionary.email[lan] }}</span>
         </label>

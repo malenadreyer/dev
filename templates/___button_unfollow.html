@@ -1,8 +1,7 @@
-<form id="follow-btn-{{ suggestion.user_pk }}" mix-post="/api-toggle-follow" style="display: inline;">
-    <input type="hidden" name="following_pk" value="{{ suggestion.user_pk }}">
+<form id="follow-btn-{{ target_user_pk }}" mix-post="/api-toggle-follow" style="display: inline;">
+    <input type="hidden" name="following_pk" value="{{ target_user_pk }}">
     <button type="submit" 
-            mix-await="Unfollowing..."
-            >
+            mix-await="Unfollowing...">
         Following
     </button>
 </form>

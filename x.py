@@ -33,7 +33,7 @@ def lans(key):
     lang = lang_map.get(dictionary.default_language, "english")
 
     return data[key][lang]
-##############################
+############################## Database login #########################
 def db():
     try:
         db = mysql.connector.connect(
@@ -49,7 +49,7 @@ def db():
         raise Exception("Twitter exception - Database under maintenance", 500)
 
 
-##############################
+############################## SECURITY & HELP ##############################
 def no_cache(view):
     @wraps(view)
     def no_cache_view(*args, **kwargs):
@@ -61,7 +61,7 @@ def no_cache(view):
     return no_cache_view
 
 
-##############################
+############################## Rules ################################
 REGEX_EMAIL = "^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$"
 def validate_user_email(lan = "en"):
     user_email = request.form.get("user_email", "").strip()
@@ -135,6 +135,32 @@ def validate_post(post = ""):
     post = post.strip()
     if not re.match(REGEX_POST, post): raise Exception("x-error post", 400)
     return post
+
+##############################
+COMMENT_MIN_LEN = 1
+COMMENT_MAX_LEN = 200
+REGEX_COMMENT = f"^.{{{COMMENT_MIN_LEN},{COMMENT_MAX_LEN}}}$"
+
+###############################
+BIO_MIN = 2
+BIO_MAX = 250
+REGEX_BIO = f"^.{{{BIO_MIN},{BIO_MAX}}}$"
+def validate_bio():
+    bio = request.form.get("user_bio","").strip()
+    if not re.match(REGEX_BIO, bio): raise Exception("Bio must be between 2 and 250 characters", 400)
+    return bio
+
+###############################
+def validate_comment(comment_message):
+    comment_message = comment_message.strip()
+
+    if len (comment_message) < 1:
+        raise Exception("Comment must be at least 1 character", 400)
+    
+    if len (comment_message) > 250:
+        raise Exception("Comment must be at least 1 and 250 characters", 400)
+
+    return comment_message
 
 
 ##############################

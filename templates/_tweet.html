@@ -8,7 +8,11 @@
                 {{ tweet.user_last_name }}
             </span>
             <span class="handle">@{{ tweet.user_username }}</span> · <span class="time">1d</span>
-            
+            {% if user.user_pk == tweet.post_user_fk %}
+            <button class="edit-post-btn" mix-get="/edit-post/{{ tweet.post_pk }}" title="Edit post">
+                <i class="fa-solid fa-pen pointer-e-none"></i>
+            </button>
+            {% endif %}
             <!-- Delete button - kun synlig for post ejeren -->
             {% if user and user.user_pk == tweet.post_user_fk %}
             <form action="/api-delete-post/{{ tweet.post_pk }}" mix-delete style="display:inline; margin-left: auto;" 
