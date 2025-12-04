@@ -2,7 +2,7 @@
     <!-- Cover billede -->
     <div class="profile-cover">
        
-            <img src="{{ url_for('static', filename='images/avatar_6.jpg') }}" alt="Cover">
+            <img src="{{ url_for('static', filename='uploads/' ~ (user.user_cover_path if user.user_cover_path else 'unknown.jpg')) }}" alt="Cover">
        
     </div>
 
@@ -41,12 +41,16 @@
             <!-- Følgere stats -->
             <div class="profile-stats">
                 <div class="stat-item">
-                    <span class="stat-number">{{user.user_following}}</span>
-                    <span class="stat-label">Following</span>
+                    <a href="/following-list" mix-get class="stat-link">
+                        <span class="stat-number">{{user.user_following}}</span>
+                        <span class="stat-label" style="pointer-events: none;">Following</span>
+                    </a>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number">{{user.user_followers}}</span>
-                    <span class="stat-label">Followers</span>
+                    <a href="/followers-list" mix-get class="stat-link">
+                        <span class="stat-number">{{user.user_followers}}</span>
+                        <span class="stat-label" style="pointer-events: none;">Followers</span>
+                    </a>
                 </div>
             </div>
         </div>

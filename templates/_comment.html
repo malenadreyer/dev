@@ -1,18 +1,18 @@
-<div id="comment-{{ comment.comment_pk }}" class="comment" style="padding: 15px; width: 100%; border-bottom: 1px solid #eee; display: flex; gap: 10px;">
+<div id="comment-{{ comment.comment_pk }}" class="comment">
     <img src="{{ url_for('static', filename='uploads/'~(comment.user_avatar_path if comment.user_avatar_path else 'unknown.jpg')) }}" 
          alt="Avatar" class="w-8 h-8 rounded-full">
-    <div style="flex: 1;">
-        <div style="margin-bottom: 5px;">
-            <strong style="color: #000;">{{ comment.user_first_name }} {{ comment.user_last_name }}</strong>
-            <span style="color: #666; margin-left: 5px;">@{{ comment.user_username }}</span>
+    <div class="comment-content">
+        <div class="comment-header">
+            <strong class="comment-author">{{ comment.user_first_name }} {{ comment.user_last_name }}</strong>
+            <span class="comment-username">@{{ comment.user_username }}</span>
         </div>
-        <p style="margin: 0 0 10px 0; color: #14171a;  word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;">{{ comment.comment_message }}</p>
+        <p class="comment-text">{{ comment.comment_message }}</p>
         
         {% if user.user_pk == comment.comment_user_fk %}
-        <form mix-post="/api-delete-comment" style="display: inline;" type="submit">
+        <form mix-post="/api-delete-comment" class="comment-delete-form">
             <input type="hidden" name="comment_pk" value="{{ comment.comment_pk }}">
             <input type="hidden" name="post_pk" value="{{ comment.comment_post_fk }}">
-            <button type="submit" style="color: #f91880; background: none; border: none; pointer-events: none; font-size: 12px;">
+            <button type="submit" class="comment-delete-btn">
                 <i class="fa-solid fa-trash"></i> Delete
             </button>
         </form>

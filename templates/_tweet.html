@@ -1,3 +1,17 @@
+<div id="post_container_{{ tweet.post_pk }}">
+    {% if user.user_admin %}
+    {% include "___block_unblock_post.html" %}
+    {% endif %}
+
+
+
+    <div class="post_container">
+        {% if tweet.post_is_blocked %}
+        <div class="blocked_post_overlay">
+            <p>This post is blocked</p>
+        </div>
+        {% endif %}
+
 <article class="post" mix-fade-in="5000" data-post-pk="{{ tweet.post_pk }}">
     <img src="{{ url_for('static', filename='uploads/'~(tweet.user_avatar_path if tweet.user_avatar_path else 'unknown.jpg')) }}" alt="Profile Picture" 
     class="w-8 h-8 rounded-full">
@@ -7,7 +21,7 @@
                 {{ tweet.user_first_name }}
                 {{ tweet.user_last_name }}
             </span>
-            <span class="handle">@{{ tweet.user_username }}</span> · <span class="time">1d</span>
+            <span class="handle">@{{ tweet.user_username }}</span> · <span class="time">{{ x.format_relative_time(tweet.post_created_at) }}</span>
             {% if user.user_pk == tweet.post_user_fk %}
             <button class="edit-post-btn" mix-get="/edit-post/{{ tweet.post_pk }}" title="Edit post">
                 <i class="fa-solid fa-pen pointer-e-none"></i>
@@ -16,9 +30,9 @@
             <!-- Delete button - kun synlig for post ejeren -->
             {% if user and user.user_pk == tweet.post_user_fk %}
             <form action="/api-delete-post/{{ tweet.post_pk }}" mix-delete style="display:inline; margin-left: auto;" 
-                mix-delay="3000" mix-await="deleting_post...">
-                <button type="submit" class="action text-c-red" hover="cursor-pointer">
-                    <i class="fa-solid fa-trash"></i>
+                mix-delay="3000" mix-await="Deleting post...">
+                <button type="submit" class="action text-c-red" style="pointer-events: none;" hover="cursor-pointer">
+                    <i class="fa-solid fa-trash" ></i>
                 </button>
             </form>
             {% endif %}
@@ -90,7 +104,7 @@
         </div>
     </div>
 </article>
-
+</div>
 <script>
     function toggleComments(postPk) {
         const section = document.getElementById('comments-section-' + postPk);

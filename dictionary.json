@@ -1,28 +1,647 @@
 {
-    "login": {
-        "english": "log in",
-        "danish": " log ind",
-        "spanish": "entrar"
+    "happening_now": {
+        "english": "Happening now",
+        "danish": "Sker lige nu",
+        "spanish": "Lo que está pasando ahora"
     },
-
-    "dont_have_an_account": {
-        "english": "Don't have an account",
-        "danish": " Har ikke en konto",
-        "spanish": "no tengo una cuenta"
+    "join_today": {
+        "english": "Join today",
+        "danish": "Tilmeld dig i dag",
+        "spanish": "Únete hoy"
+    },
+    "sign_up": {
+        "english": "Sign up",
+        "danish": "Opret konto",
+        "spanish": "Inscribirse"
+    },
+    "log_in": {
+        "english": "Log in",
+        "danish": "Log ind",
+        "spanish": "Entrar"
+    },
+    "": {
+        "english": "",
+        "danish": "",
+        "spanish": ""
+    },
+    "sign_up_to_x": {
+        "english": "Sign up to X",
+        "danish": "Tilmeld dig til X",
+        "spanish": "Regístrate en X"
     },
     "email": {
         "english": "Email",
-        "danish": " E-mail",
-        "spanish": "correo electrónico"
+        "danish": "Email",
+        "spanish": "Correo electrónico"
+    },
+    "username": {
+        "english": "Username",
+        "danish": "Brugernavn",
+        "spanish": "Nombre de usuario"
+    },
+    "first_name": {
+        "english": "First name",
+        "danish": "Fornavn",
+        "spanish": "Nombre"
+    },
+    "last_name": {
+        "english": "Last name",
+        "danish": "Efternavn",
+        "spanish": "Apellido"
     },
     "password": {
         "english": "Password",
         "danish": "Adgangskode",
-        "spanish": "Contraseña"
+        "spanish": "Clave"
+    },
+    "your_username_must_be_between": {
+        "english": "Your username must be between",
+        "danish": "Dit brugernavn skal være mellem",
+        "spanish": "Tu nombre de usuario debe estar entre"
+    },
+    "your_first_name_must_be_between": {
+        "english": "Your first name must be between",
+        "danish": "Dit fornavn skal være mellem",
+        "spanish": "Tu nombre debe estar entre"
+    },
+    "your_last_name_must_be_between": {
+        "english": "Your last name must be between",
+        "danish": "Dit efternavn skal være mellem",
+        "spanish": "Tu apellido debe estar entre"
+    },
+    "your_password_must_be_between": {
+        "english": "Your password must be between",
+        "danish": "Din adgangskode skal være mellem",
+        "spanish": "Tu contraseña debe estar entre"
+    },
+    "to": {
+        "english": "to",
+        "danish": "til",
+        "spanish": "a"
+    },
+    "characters": {
+        "english": "characters",
+        "danish": "tegn",
+        "spanish": "personajes"
+    },
+    "signup": {
+        "english": "Signup",
+        "danish": "Opret konto",
+        "spanish": "Inscribirse"
+    },
+    "signing_up": {
+        "english": "Signing up",
+        "danish": "Opretter konto",
+        "spanish": "Registrándose"
     },
     "have_an_account": {
         "english": "Have an account",
-        "danish": "Har en konto",
-        "spanish": "Tener una cuenta"
-    }
+        "danish": "Har du en konto",
+        "spanish": "Tienes una cuenta"
+    },
+    "email_already_registered": {
+        "english": "Email already registered",
+        "danish": "Email allerede registreret",
+        "spanish": "Correo electrónico ya registrado"
+    },
+    "invalid_email": {
+        "english": "Invalid email",
+        "danish": "Ugyldig email",
+        "spanish": "Correo electrónico inválido"
+    },
+    "username_already_registered": {
+        "english": "Username already registered",
+        "danish": "Brugernavn allerede registreret",
+        "spanish": "Nombre de usuario ya registrado"
+    },
+    "min": {
+        "english": "min",
+        "danish": "min",
+        "spanish": "mín"
+    },
+    "max": {
+        "english": "max",
+        "danish": "max",
+        "spanish": "máx"
+    },
+    "invalid_confirm_password": {
+        "english": "Invalid Confirm Password",
+        "danish": "Ugyldig bekræftelse af adgangskode",
+        "spanish": "Confirmación de contraseña no válida"
+    },
+    "log_in_to_x": {
+        "english": "Log in to X",
+        "danish": "Log ind til X",
+        "spanish": "Entrar X"
+    },
+    "login": {
+        "english": "Login",
+        "danish": "Log ind",
+        "spanish": "Entrar"
+    },
+    "logging_in": {
+        "english": "Logging in",
+        "danish": "Logger ind",
+        "spanish": "Iniciando sesión"
+    },
+    "dont_have_an_account": {
+        "english": "Don't have an account",
+        "danish": "Har du ikke en konto",
+        "spanish": "No tienes cuenta"
+    },
+    "forgot_your_password": {
+        "english": "Forgot your password",
+        "danish": "Glemt din adgangskode",
+        "spanish": "¿Olvidaste tu contraseña"
+    },
+    "next": {
+        "english": "Next",
+        "danish": "Videre",
+        "spanish": "Próximo"
+    },
+    "user_not_found": {
+        "english": "User not found",
+        "danish": "Bruger ikke fundet",
+        "spanish": "Usuario no encontrado"
+    },
+    "invalid_credentials": {
+        "english": "Invalid credentials",
+        "danish": "Ugyldige loginoplysninger",
+        "spanish": "Información incorrecta"
+    },
+    "user_not_verified": {
+        "english": "User not verified. Please check your email",
+        "danish": "Bruger ikke verificeret. Tjek venligst din e-mail",
+        "spanish": "Usuario no verificado. Por favor, chequéa tu email"
+    },
+    "user_is_blocked": {
+        "english": "User is blocked",
+        "danish": "Brugeren er blokeret",
+        "spanish": "El usuario está bloqueado"
+    },
+    "verify_your_account": {
+        "english": "Verify your account",
+        "danish": "Bekræft din konto",
+        "spanish": "Verifica tu cuenta"
+    },
+    "invalid_key": {
+        "english": "Invalid key",
+        "danish": "Ugyldig nøgle",
+        "spanish": "Clave no válida"
+    },
+    "invalid_uuid4": {
+        "english": "Invalid uuid4",
+        "danish": "Ugyldig uuid4",
+        "spanish": "uuid4 no válido"
+    },
+    "invalid_uuid4_without_dashes": {
+        "english": "Invalid uuid4 without dashes",
+        "danish": "Ugyldig uuid4 uden bindestreger",
+        "spanish": "uuid4 sin guiones no válido"
+    },
+    "welcome_to_x": {
+        "english": "Welcome to X",
+        "danish": "Velkommen til X",
+        "spanish": "Bienvenidos a X"
+    },
+    "you_need_to_verify_your_account": {
+        "english": "You need to verify your account",
+        "danish": "Du skal bekræfte din konto",
+        "spanish": "Necesitas verificar tu cuenta"
+    },
+    "email_sent": {
+        "english": "Email sent",
+        "danish": "Email sendt",
+        "spanish": "Correo enviado"
+    },
+    "cannot_send_email": {
+        "english": "cannot send email",
+        "danish": "Kan ikke sende e-mail",
+        "spanish": "No se puede enviar el correo"
+    },
+    "check_your_email": {
+        "english": "check_your_email",
+        "danish": "Tjek din email",
+        "spanish": "Revisa tu correo"
+    },
+    "click_here_to_get_verified": {
+        "english": "Click here to get verified",
+        "danish": "Klik her for at blive bekræftet",
+        "spanish": "Haz clic aquí para verificarte"
+    },
+    "fresh_news": {
+        "english": "Fresh news",
+        "danish": "Friske nyheder",
+        "spanish": "Noticias frescas"
+    },
+    "home": {
+        "english": "Home",
+        "danish": "Hjem",
+        "spanish": "Casa"
+    },
+    "explore": {
+        "english": "Explore",
+        "danish": "Udforsk",
+        "spanish": "Explorar"
+    },
+    "notifications": {
+        "english": "Notifications",
+        "danish": "Notifikationer",
+        "spanish": "Notificaciones"
+    },
+    "messages": {
+        "english": "Messages",
+        "danish": "Beskeder",
+        "spanish": "Mensajes"
+    },
+    "edit": {
+        "english": "Edit",
+        "danish": "Indstillinger",
+        "spanish": "Editar"
+    },
+    "bookmarks": {
+        "english": "Bookmarks",
+        "danish": "Bogmærker",
+        "spanish": "Marcadores"
+    },
+    "jobs": {
+        "english": "Jobs",
+        "danish": "Jobs",
+        "spanish": "Empleos"
+    },
+    "communities": {
+        "english": "Communities",
+        "danish": "Fællesskaber",
+        "spanish": "Comunidades"
+    },
+    "premium": {
+        "english": "Premium",
+        "danish": "Præmium",
+        "spanish": "Premium"
+    },
+    "profile": {
+        "english": "Profile",
+        "danish": "Profil",
+        "spanish": "Perfil"
+    },
+    "more": {
+        "english": "More",
+        "danish": "Mere",
+        "spanish": "Más"
+    },
+    "logout": {
+        "english": "Log out",
+        "danish": "Log ud",
+        "spanish": "Cerrar sesión"
+    },
+    "admin_panel": {
+        "english": "Admin panel",
+        "danish": "Administrationspanel",
+        "spanish": "Panel de administración"
+    },
+    "active_users": {
+        "english": "Active users",
+        "danish": "Aktive brugere",
+        "spanish": "Usuarios activos"
+    },
+    "blocked_users": {
+        "english": "Blocked users",
+        "danish": "Blokerede brugere",
+        "spanish": "Usuarios bloqueados"
+    },
+    "block_user": {
+        "english": "Block user",
+        "danish": "Bloker bruger",
+        "spanish": "Bloquear usuario"
+    },
+    "unblock_user": {
+        "english": "Unblock User",
+        "danish": "Fjern blokering af bruger",
+        "spanish": "Desbloquear usuario"
+    },
+    "blocking": {
+        "english": "Blocking",
+        "danish": "Blokerer",
+        "spanish": "Bloqueando"
+    },
+    "unblocking": {
+        "english": "Unblocking",
+        "danish": "Fjerner blokering",
+        "spanish": "Desbloqueando"
+    },
+    "this_post_is_blocked": {
+        "english": "This post is blocked",
+        "danish": "Dette opslag er blokeret",
+        "spanish": "Esta publicación está bloqueada"
+    },
+    "post": {
+        "english": "Post",
+        "danish": "Del",
+        "spanish": "Compartir"
+    },
+    "what_is_new": {
+        "english": "What is new?",
+        "danish": "Hvad er nyt?",
+        "spanish": "Qué hay de nuevo?"
+    },
+    "posting": {
+        "english": "Posting",
+        "danish": "Opretter opslag",
+        "spanish": "Publicando"
+    },
+    "the_world_is_reading_your_post": {
+        "english": "The world is reading your post",
+        "danish": "Verden læser dit opslag",
+        "spanish": "El mundo está leyendo tu publicación"
+    },
+    "deleting_post": {
+        "english": "Deleting post",
+        "danish": "Sletter opslag",
+        "spanish": "Eliminando publicación"
+    },
+    "your_post_has_been_deleted": {
+        "english": "Your post has been deleted",
+        "danish": "Dit opslag er blevet slettet",
+        "spanish": "Tu publicación ha sido eliminada"
+    },
+    "post_your_reply": {
+        "english": "Post your reply",
+        "danish": "Post dit svar",
+        "spanish": "Publica tu respuesta"
+    },
+    "commenting": {
+        "english": "Commenting",
+        "danish": "Kommenterer",
+        "spanish": "Comentando"
+    },
+    "reply": {
+        "english": "Reply",
+        "danish": "Svar",
+        "spanish": "Responder"
+    },
+    "edit_post": {
+        "english": "Edit post",
+        "danish": "Rediger opslag",
+        "spanish": "Editar publicacíon"
+    },
+    "cancel": {
+        "english": "Cancel",
+        "danish": "Annullér",
+        "spanish": "Cancelar"
+    },
+    "save_changes": {
+        "english": "Save changes",
+        "danish": "Gem ændringer",
+        "spanish": "Guardar cambios"
+    },
+    "video_not_supported": {
+        "english": "Your browser does not support the video tag",
+        "danish": "Din browser understøtter ikke video afspilning",
+        "spanish": "Tu navegador no soporta la etiqueta de video"
+    },
+    "whats_happening": {
+        "english": "What's happening?",
+        "danish": "Hvad sker der?",
+        "spanish": "¿Qué está pasando?"
+    },
+    "add_photo_or_video": {
+        "english": "Add photo or video",
+        "danish": "Tilføj foto eller video",
+        "spanish": "Agregar foto o video"
+    },
+    "search": {
+        "english": "Search",
+        "danish": "Søg",
+        "spanish": "Buscar"
+    },
+    "search_x": {
+        "english": "Search X",
+        "danish": "Søg på X",
+        "spanish": "Buscar en X"
+    },
+    "what_is_happening_now": {
+        "english": "What's happening now",
+        "danish": "Hvad sker der i verden",
+        "spanish": "Qué está pasando en el mundo"
+    },
+    "more_news": {
+        "english": "More news",
+        "danish": "Flere nyheder",
+        "spanish": "Más noticias"
+    },
+    "who_to_follow": {
+        "english": "Who to follow",
+        "danish": "Personer du kan følge",
+        "spanish": "Personas que puedes seguir"
+    },
+    "follow": {
+        "english": "Follow",
+        "danish": "Følg",
+        "spanish": "Seguir"
+    },
+    "show_more": {
+        "english": "Se mere",
+        "danish": "Vis mere",
+        "spanish": "Mostrar más"
+    },
+    "unfollow": {
+        "english": "Unfollow",
+        "danish": "Fjern ",
+        "spanish": "Eliminar"
+    },
+    "followers": {
+        "english": "Followers",
+        "danish": "Følgere",
+        "spanish": "Seguidores"
+    },
+    "following": {
+        "english": "Following",
+        "danish": "Følger",
+        "spanish": "Sigue"
+    },
+    "edit_profile": {
+        "english": "Edit profile",
+        "danish": "Rediger profil",
+        "spanish": "Editar perfil"
+    },
+    "update_profile": {
+        "english": "Update profile",
+        "danish": "Opdater profil",
+        "spanish": "Actualizar perfil"
+    },
+    "updating_profile": {
+        "english": "Updating profile",
+        "danish": "Opdaterer profil",
+        "spanish": "Actualizando perfil"
+    },
+    "profile_updated_successfully": {
+        "english": "Profile updated successfully",
+        "danish": "Profil opdateret med succes",
+        "spanish": "Perfil actualizado con éxito"
+    },
+    "profile_picture": {
+        "english": "Profile Picture",
+        "danish": "Profilbillede",
+        "spanish": "Foto de perfil"
+    },
+    "current_avatar": {
+        "english": "Current avatar",
+        "danish": "Nuværende avatar",
+        "spanish": "Avatar actual"
+    },
+    "choose_new_picture": {
+        "english": "Choose new picture",
+        "danish": "Vælg nyt billede",
+        "spanish": "Elegir nuevo avatar"
+    },
+    "upload_avatar": {
+        "english": "Upload",
+        "danish": "Upload",
+        "spanish": "Subir"
+    },
+    "uploading": {
+        "english": "Uploading...",
+        "danish": "Uploader...",
+        "spanish": "Subiendo..."
+    },
+    "joined": {
+        "english": "Joined",
+        "danish": "Medlem siden",
+        "spanish": "Unido"
+    },
+    "loading": {
+        "english": "Loading...",
+        "danish": "Loader...",
+        "spanish": "Cargando..."
+    },
+    "posts": {
+        "english": "Posts",
+        "danish": "Opslag",
+        "spanish": "Publicaciones"
+    },
+    "media": {
+        "english": "Media",
+        "danish": "Medier",
+        "spanish": "Medios"
+    },
+    "likes": {
+        "english": "Likes",
+        "danish": "Likes",
+        "spanish": "Me gusta"
+    },
+    "no_posts_yet": {
+        "english": "No posts yet",
+        "danish": "Ingen opslag endnu",
+        "spanish": "Aún no hay publicaciones"
+    },
+    "delete_profile": {
+        "english": "Delete profile",
+        "danish": "Slet profil",
+        "spanish": "Eliminar perfill"
+    },
+    "are_you_sure": {
+        "english": "Are you sure you want to delete your profile?",
+        "danish": "Er du sikker på at du vil slette din profil?",
+        "spanish": "¿Estás seguro de que quieres eliminar tu perfill?"
+    },
+    "yes_delete_my_profile": {
+        "english": "Yes - Delete my profile",
+        "danish": "Ja - slet min profil",
+        "spanish": "Sí - eliminar mi perfil"
+    },
+    "deleting_profile": {
+        "english": "Deleting profile",
+        "danish": "Sletter profil",
+        "spanish": "Eliminando prefil"
+    },
+    "no_cancel": {
+        "english": "No - Cancel",
+        "danish": "Nej - annullér",
+        "spanish": "No - cancelar"
+    },
+    "you_have_been_blocked": {
+        "english": "You have been blocked from X",
+        "danish": "Du er blevet blokeret fra X",
+        "spanish": "Has sido bloqueado de X"
+    },
+    "you_have_been_blocked_text": {
+        "english": "You have been blocked from X and therefore you can no longer login to your account.",
+        "danish": "Du er blevet blokeret fra X og kan derfor ikke længere logge ind på din konto.",
+        "spanish": "Has sido bloqueado de X y por lo tanto ya no puedes iniciar sesión en tu cuenta."
+    },
+    "you_have_been_unblocked": {
+        "english": "You have been unblocked from X",
+        "danish": "Du er blevet ophævet blokeringen fra X",
+        "spanish": "Has sido desbloqueado de X"
+    },
+    "you_have_been_unblocked_text": {
+        "english": "You have been unblocked from X and can now login to your account again.",
+        "danish": "Du er blevet ophævet blokeringen fra X og kan nu logge ind på din konto igen.",
+        "spanish": "Has sido desbloqueado de X"
+    },
+    "post_has_been_blocked": {
+        "english": "Your post has been blocked from X",
+        "danish": "Dit opslag er blevet blokeret fra X",
+        "spanish": "Tu publicación ha sido bloqueada de X"
+    },
+    "post_has_been_blocked_text": {
+        "english": "Your post has crossed our guidelines and have been blocked from X.",
+        "danish": "Dit opslag har overtrådt vores retningslinjer og er blevet blokeret fra X.",
+        "spanish": "Tu publicación ha violado nuestras directrices y ha sido bloqueada de X."
+    },
+    "post_has_been_unblocked": {
+        "english": "Your post has been unblocked from X",
+        "danish": "Dit opslag er nu tilgængeligt på X igen.",
+        "spanish": "Tu publicación ha sido desbloqueada en X."
+    },
+    "post_has_been_unblocked_text": {
+        "english": "Your post has been unblocked and is now visible on X again.",
+        "danish": "Dit opslag er blevet ophævet fra blokering og er nu synligt på X igen.",
+        "spanish": "Tu publicación ha sido desbloqueada y ahora vuelve a ser visible en X."
+    },
+    "reset_your_password": {
+        "english": "Reset your password",
+        "danish": "Nulstil din adgangskode",
+        "spanish": "Restablecer tu contraseña"
+      },
+    "update_password": {
+        "english": "Update your password",
+        "danish": "Opdatere din adgangskode",
+        "spanish": "Haz clic aquí para actualizar tu contraseña"
+    },
+    "updating": {
+        "english": "Updating",
+        "danish": "Opdaterer",
+        "spanish": "Actualizando"
+      },
+    "system_under_maintenance": {
+        "english": "System under maintenance",
+        "danish": "Systemet er under vedligeholdelse",
+        "spanish": "Sistema en mantenimiento"
+    },
+    "enter_email_reset_link": {
+        "english": "Enter your email, and we'll send you a reset link.",
+        "danish": "Indtast din email, og vi sender dig et nulstillingslink.",
+        "spanish": "Ingresa tu correo electrónico y te enviaremos un enlace de restablecimiento."
+  },
+  "send_reset_link": {
+    "english": "Send reset link",
+    "danish": "Send nulstillingslink",
+    "spanish": "Enviar enlace de restablecimiento"
+  },
+  "sending": {
+    "english": "Sending",
+    "danish": "Sender",
+    "spanish": "Enviando"
+  },
+  "back_to_login": {
+    "english": "Back to login",
+    "danish": "Tilbage til login",
+    "spanish": "Volver al inicio de sesión"
+  },
+  "new_password": {
+    "english": "New Password",
+    "danish": "Ny adgangskode",
+    "spanish": "Nueva contraseña"
+  }
 }

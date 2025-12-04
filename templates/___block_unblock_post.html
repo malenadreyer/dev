@@ -1,10 +1,12 @@
 <div id="block_unblock_post_{{ tweet.post_pk }}">
-    <a href="/admin-block-post/{{ tweet.post_pk }}" mix-post
-        mix-await="{% if tweet.post_is_blocked %}Unblocking...{% else %}Blocking...{% endif %}">
+    <a href="/admin-block-post/{{ tweet.post_pk }}" 
+       mix-post
+       mix-await="{% if tweet.post_is_blocked %}Unblocking...{% else %}Blocking...{% endif %}"
+       class="{% if tweet.post_is_blocked %}admin-unblock-btn{% else %}admin-block-btn{% endif %}">
         {% if tweet.post_is_blocked %}
         Unblock post
         {% else %}
         Block post
         {% endif %}
     </a>
-</div>
+</div

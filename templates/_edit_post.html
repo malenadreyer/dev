@@ -1,29 +1,28 @@
 <div class="edit-post-page">
-    <div class="profile-header" style="border-bottom: 1px solid #eff3f4; padding: 12px 16px; display: flex; align-items: center; gap: 32px;">
-        <a href="#" mix-get="/home" class="back-button" style="color: #0f1419; font-size: 20px;">
-            <i class="fa-solid fa-x" style="pointer-events: none;"></i>
+    <div class="profile-header">
+        <a href="#" mix-get="/home" class="back-button">
+            <i class="fa-solid fa-x"></i>
         </a>
-        <div class="header-info" style="flex: 1;">
-            <h2 style="font-size: 20px; font-weight: 700; margin: 0;">Edit post</h2>
+        <div class="header-info">
+            <h2>Edit post</h2>
         </div>
-        <button type="submit" form="edit-post-form" class="btn-save" 
-                style="background: #1d9bf0; color: white; border: none; border-radius: 20px; padding: 8px 24px; font-weight: 700; font-size: 15px; cursor: pointer;">
+        <button type="submit" form="edit-post-form" class="btn-save">
             Save
         </button>
     </div>
     
-    <div class="edit-post-wrapper" style="padding: 16px;">
+    <div class="edit-post-wrapper">
         <form id="edit-post-form" mix-post="/api-update-post/{{ post.post_pk }}" class="edit-post-form">
-            <div style="display: flex; gap: 12px;">
+            <div class="edit-post-form-container">
                 <img src="{{ url_for('static', filename='uploads/' ~ (user.user_avatar_path if user.user_avatar_path else 'unknown.jpg')) }}" 
-                     style="width: 40px; height: 40px; border-radius: 50%;" 
+                     class="edit-post-avatar"
                      alt="Profile">
                 
-                <div style="flex: 1;">
+                <div class="edit-post-content">
                     <textarea id="post-textarea" 
                               name="post_message" 
                               placeholder="What's happening?" 
-                              style="width: 100%; border: none; outline: none; font-size: 20px; resize: none; min-height: 120px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
+                              class="edit-post-textarea"
                               maxlength="250"
                               oninput="
                               const counter = document.getElementById('char-count-edit');
@@ -31,10 +30,10 @@
                               counter.textContent = len;
                               counter.style.color = len > 250 ? 'red' : (len > 230 ? 'orange' : '#1d9bf0')">{{ post.post_message }}</textarea>
                     
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eff3f4;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="color: #536471; font-size: 13px;">
-                                <span  id="char-count-edit" style="color: #1d9bf0;">
+                    <div class="edit-post-footer">
+                        <div class="edit-post-counter-wrapper">
+                            <div class="edit-post-char-counter">
+                                <span id="char-count-edit" class="edit-post-char-count">
                                     {{ post.post_message|length }}
                                 </span>/250
                             </div>
@@ -45,4 +44,3 @@
         </form>
     </div>
 </div>
-

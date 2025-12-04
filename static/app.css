@@ -648,7 +648,7 @@ p{
   text-decoration: underline;
 }
 
-/* Profile Watch Styles */
+/* --------------------- PROFIL WATCH ------------------ */
 .profile-watch {
   max-width: 600px;
   margin: 0 auto;
@@ -836,120 +836,24 @@ p{
   border-radius: 4px 4px 0 0;
 }
 
-.profile-posts {
-  border-top: 1px solid #eff3f4;
-}
-
-.post-item {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  border-bottom: 1px solid #eff3f4;
-  transition: background 0.2s;
-}
-
-.post-item:hover {
-  background: rgba(0, 0, 0, 0.03);
-}
-
-.post-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.post-content {
-  flex: 1;
-}
-
-.post-header {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  margin-bottom: 4px;
-}
-
-.post-name {
-  font-weight: 700;
-  color: #0f1419;
-}
-
-.post-username,
-.post-time {
-  color: #536471;
-  font-size: 15px;
-}
-
-.post-text {
-  font-size: 15px;
-  color: #0f1419;
-  line-height: 1.5;
-  margin: 0;
-}
 
 .no-posts {
   text-align: center;
   padding: 60px 20px;
   color: #536471;
-}
-
-.no-posts i {
+ i {
   font-size: 48px;
   margin-bottom: 16px;
   display: block;
 }
-
-.no-posts p {
+p {
   font-size: 15px;
   margin: 0;
 }
-.profile-bio-empty {
-  font-size: 15px;
-  color: #536471;
-  margin: 12px 0;
-  font-style: italic;
-}
-.profile-cover {
-  width: 100%;
-  height: 200px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-  z-index: 0;
 }
 
+/* ------------------COMMENT SECTION ---------------- */
 
-#edit_modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-.edit-modal-content {
-  background: #fff;
-  width: 400px;
-  padding: 20px;
-  border-radius: 12px;
-}
-
-.edit-text {
-  width: 100%;
-  height: 120px;
-}
-
-.modal-actions {
-  margin-top: 15px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.save-btn, .cancel-btn {
-  padding: 8px 16px;
-  border-radius: 8px;
-}
 .comments-section {
   margin-top: 10px;
   border-top: 1px solid #eee;
@@ -964,7 +868,169 @@ p{
 .comment:hover {
   background: #f0f0f0;
 }
-/* ---------------DELETE BOX------------ */
+/* ------------------------------_COMMENT.HTML -------------------------- */
+.comments-section {
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  background: #f7f9fa;
+}
+
+.comments-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.comment {
+  padding: 15px;
+  width: 100%;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+}
+
+.comment:hover {
+  background: #f0f0f0;
+}
+
+.comment-content {
+  flex: 1;
+}
+
+.comment-header {
+  margin-bottom: 5px;
+}
+
+.comment-author {
+  color: #000;
+  font-weight: bold;
+}
+
+.comment-username {
+  color: #666;
+  margin-left: 5px;
+}
+
+.comment-text {
+  margin: 0 0 10px 0;
+  color: #14171a;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.comment-delete-form {
+  display: inline;
+}
+
+.comment-delete-btn {
+  color: #f91880;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.comment-delete-btn:hover {
+  color: #d6005f;
+}
+/* ------------------------------EDIT POST------------------------------ */
+.edit-post-page {
+  /* Container styling hvis nødvendigt */
+}
+
+.edit-post-page .profile-header {
+  border-bottom: 1px solid #eff3f4;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.edit-post-page .back-button {
+  color: #0f1419;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.edit-post-page .back-button i {
+  pointer-events: none;
+}
+
+.edit-post-page .header-info {
+  flex: 1;
+}
+
+.edit-post-page .header-info h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.edit-post-page .btn-save {
+  background: #1d9bf0;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 24px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.edit-post-page .btn-save:hover {
+  background: #1a8cd8;
+}
+
+.edit-post-wrapper {
+  padding: 16px;
+}
+
+.edit-post-form-container {
+  display: flex;
+  gap: 12px;
+}
+
+.edit-post-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.edit-post-content {
+  flex: 1;
+}
+
+.edit-post-textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 20px;
+  resize: none;
+  min-height: 120px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.edit-post-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eff3f4;
+}
+
+.edit-post-counter-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.edit-post-char-counter {
+  color: #536471;
+  font-size: 13px;
+}
+
+.edit-post-char-count {
+  color: #1d9bf0;
+}
+/* ------------------------------DELETE BOX------------------------------ */
 .overlay-backdrop {
   position: fixed;
   top: 0;
@@ -1044,4 +1110,224 @@ p{
 
 .delete-dialog__btn--delete:hover {
   background: #d91c27;
+}
+/* ------------------------- ADMIN -------------------------- */
+.dropdown-wrapper {
+  position: relative;
+}
+
+.dropdown-wrapper:focus-within .dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  border-radius: 8px;
+  display: none;
+  min-width: 120px;
+}
+.post_container {
+  display: grid;
+
+  > * {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+  }
+}
+
+.post_container > article.post {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+.post-container-wrapper {
+  border-bottom: 1px solid #2f3336;
+}
+
+.create-post-form {
+  padding: 16px;
+  width: 100%;
+}
+
+.blocked_post_overlay {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(182, 182, 182);
+  width: 100%;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+/* --- block button --- */
+.admin-block-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  background: #f4212e;
+  color: white;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.admin-block-btn:hover {
+  background: #d91c27;
+  transform: scale(1.02);
+}
+
+.admin-unblock-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  background: #00ba7c;
+  color: white;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.admin-unblock-btn:hover {
+  background: #009966;
+  transform: scale(1.02);
+}
+
+/* ---------- FOLLOWER AND FOLLOWING -------- */
+.stat-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.stat-link:hover .stat-number {
+  text-decoration: underline;
+}
+/* Followers & Following Pages */
+.followers-page, .following-page {
+  min-height: 100vh;
+  background: white;
+}
+
+.followers-page .profile-header,
+.following-page .profile-header {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #eff3f4;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  z-index: 100;
+}
+
+.followers-page .back-button,
+.following-page .back-button {
+  color: #0f1419;
+  font-size: 20px;
+  text-decoration: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.followers-page .back-button:hover,
+.following-page .back-button:hover {
+  background: rgba(15, 20, 25, 0.1);
+}
+
+.followers-page .header-info h2,
+.following-page .header-info h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #0f1419;
+}
+
+/* Users List */
+.users-list {
+  padding: 0;
+}
+
+.user-item {
+  padding: 16px;
+  border-bottom: 1px solid #eff3f4;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.2s;
+}
+
+.user-item:hover {
+  background: #f7f9f9;
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: #0f1419;
+  margin: 0 0 2px 0;
+}
+
+.user-username {
+  font-size: 15px;
+  color: #536471;
+  margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #536471;
+}
+
+.empty-state i {
+  font-size: 64px;
+  margin-bottom: 20px;
+  display: block;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 31px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #0f1419;
+}
+
+/* Stat Links */
+.stat-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+}
+
+.stat-link:hover .stat-number {
+  text-decoration: underline;
 }

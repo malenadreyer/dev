@@ -1,4 +1,5 @@
 from flask import request, make_response, render_template
+from datetime import datetime
 import mysql.connector
 import re 
 import dictionary
@@ -18,21 +19,17 @@ UPLOAD_ITEM_FOLDER = './images'
 ##############################
 allowed_languages = ["english", "danish", "spanish"]
 google_spread_sheet_key = "1BDCl5DoPFXWLiJhyJaQ3UMlS8TkF79ExiCGYgz7D0WM"
-default_language = "en"
+default_language = "english"
 
 def lans(key):
+    """
+    Load translation from dictionary.json
+
+    """
     with open("dictionary.json", 'r', encoding='utf-8') as file:
         data = json.load(file)
+    return data[key][default_language]
 
-    lang_map = {
-        "en": "english",
-        "dk": "danish",
-        "sp": "spanish"
-    }
-
-    lang = lang_map.get(dictionary.default_language, "english")
-
-    return data[key][lang]
 ############################## Database login #########################
 def db():
     try:
@@ -162,6 +159,32 @@ def validate_comment(comment_message):
 
     return comment_message
 
+
+#################################
+def format_relative_time(timestamp):
+    """Convert timestamp to relative time like '2h ago'"""
+    import time
+    if not timestamp or timestamp == 0:
+        return "Unknown"
+    
+    try:
+        now = int(time.time())
+        diff = now - timestamp
+        
+        if diff < 60:
+            return f"{diff}s"
+        elif diff < 3600:
+            return f"{diff // 60}m"
+        elif diff < 86400:
+            return f"{diff // 3600}h"
+        elif diff < 604800:
+            return f"{diff // 86400}d"
+        else:
+            from datetime import datetime
+            date = datetime.fromtimestamp(timestamp)
+            return date.strftime("%b %d")  # "Dec 3"
+    except:
+        return "Unknown"
 
 ##############################
 def send_email(to_email, subject, template):

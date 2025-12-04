@@ -7,8 +7,11 @@
         <label for="user_avatar_path">Profil Image</label>
         <input type="file" name="user_avatar_path" id="user_avatar_path" accept="image/*" >
     </div>
-
-    <button type="submit" class="x-dialog__btn"  >Update picture</button>
+    <div>
+        <label for="user_cover_path">Cover Image</label>
+        <input type="file" name="user_cover_path" id="user_cover_path" accept="image/*" >
+    </div>
+    
     <div>
         <label for="user_bio">
         <span>Profil bio</span>{{ x.BIO_MIN }} to {{ x.BIO_MAX }}

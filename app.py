@@ -29,10 +29,25 @@ Session(app)
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Sørg for mappen eksisterer
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-ALLOWED_EXTENSIONS ={"png", "jpg", "jpeg"}
+ALLOWED_EXTENSIONS ={"png", "jpg", "jpeg", "webp"}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+##############################
+@app.context_processor
+def global_variables():
+    return dict (
+        dictionary = dictionary,
+        x = x,
+        lans=x.lans,
+        
+    )
+###############################
+@app.get("/file")
+def view_file_preview():
+    return render_template("file_preview.html")
 
 ##############################
 ##############################
@@ -42,9 +57,6 @@ def _____USER_____(): pass
 ##############################
 ##############################
 
-@app.get("/file")
-def view_file_preview():
-    return render_template("file_preview.html")
 
 
 
@@ -53,33 +65,16 @@ def view_index():
     return render_template("index.html")
 
 
-##############################
-@app.context_processor
-def global_variables():
-    return dict (
-        dictionary = dictionary,
-        x = x
-    )
- 
-
+#####################################
 ################ LOGIN ##############
-########################################################################################################################
 @app.route("/login", methods=["GET", "POST"])
 @app.route("/login/<lan>", methods=["GET", "POST"])
 @x.no_cache
 def login(lan = "english"):
- 
-    lan_map = {
-        "english": "en",
-        "danish": "dk",
-        "spanish": "sp",
-    }
 
-    lan = lan_map.get(lan, "en")
- 
-    if lan not in dictionary.allowed_languages: lan = "english"
+    if lan not in x.allowed_languages:
+        lan = "english" 
     x.default_language = lan
-    dictionary.default_language = lan
 
    
 
@@ -147,17 +142,10 @@ def logout():
 @app.route("/signup/<lan>", methods=["GET", "POST"])
 def signup(lan = "english"):
 
-    lan_map = {
-        "english": "en",
-        "danish": "dk",
-        "spanish": "sp",
-    }
-
-    lan = lan_map.get(lan, "en")
- 
-    if lan not in dictionary.allowed_languages: lan = "english"
+    if lan not in x.allowed_languages:
+        lan = "english" 
     x.default_language = lan
-    dictionary.default_language = lan
+ 
   
     if request.method == "GET":
         return render_template("signup.html", lan=lan)
@@ -247,6 +235,7 @@ def signup(lan = "english"):
 @app.post("/forgot-password")
 def forgot_password():
     try:
+
         user_email = request.form.get("user_email").strip()
         if not user_email:
             raise Exception("Email is required", 400)
@@ -331,7 +320,7 @@ def reset_password_post():
 def forgot_password_page():
     return render_template("forgot_password.html")
 
-############################### HOME #########3######################
+############################### HOME ###############################
 ##########################################################################################
 @app.get("/home")
 @x.no_cache
@@ -399,7 +388,7 @@ def verify_account():
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
 
-##############################
+################################### HOME 
 @app.get("/home-comp")
 @x.no_cache
 def home_comp():
@@ -459,7 +448,7 @@ def profile():
     finally:
         pass
 
-############################################
+############################################ PROFIL WATCH
 @app.get("/profile-watch")
 @x.no_cache
 def profile_watch():
@@ -520,9 +509,10 @@ def api_create_post():
         user_pk = user["user_pk"]        
         post = x.validate_post(request.form.get("post", ""))
         post_pk = uuid.uuid4().hex
+        post_created_at = int(time.time())
         db, cursor = x.db()
-        q = "INSERT INTO posts VALUES(%s, %s, %s, %s,%s, NULL)"
-        cursor.execute(q, (post_pk, user_pk, post, 0,0))
+        q = "INSERT INTO posts VALUES(%s, %s, %s, %s,%s, NULL, %s, %s)"
+        cursor.execute(q, (post_pk, user_pk, post, 0,0, post_created_at, 0))
         db.commit()
         toast_ok = render_template("___toast_ok.html", message="The world is reading your post !")
         tweet = {
@@ -531,13 +521,13 @@ def api_create_post():
             "user_username": user["user_username"],
             "user_avatar_path": user["user_avatar_path"],
             "post_message": post,
+            "post_created_at": post_created_at
+
         }
-        html_post_container = render_template("___post_container.html")
-        html_post = render_template("_tweet.html", tweet=tweet)
+        html_post = render_template("_tweet.html", tweet=tweet, user=user)
         return f"""
             <browser mix-bottom="#toast">{toast_ok}</browser>
             <browser mix-top="#posts">{html_post}</browser>
-            <browser mix-replace="#post_container">{html_post_container}</browser>
         """
     except Exception as ex:
         ic(ex)
@@ -575,25 +565,37 @@ def api_update_profile():
         user_first_name = x.validate_user_first_name(lan)
         user_last_name=request.form.get("user_last_name", "").strip()
         user_avatar_path = user.get("user_avatar_path", "")
+        user_cover_path = user.get("user_cover_path", "")
         user_bio = x.validate_bio()
-        uploaded_file = request.files.get("user_avatar_path")
+        uploaded_avatar = request.files.get("user_avatar_path")
+        uploaded_cover = request.files.get("user_cover_path")
 
-        if uploaded_file and uploaded_file.filename != "" and allowed_file(uploaded_file.filename):
-            ext = os.path.splitext(uploaded_file.filename)[1]
+        if uploaded_avatar and uploaded_avatar.filename != "" and allowed_file(uploaded_avatar.filename):
+            ext = os.path.splitext(uploaded_avatar.filename)[1]
             new_name = f"{uuid.uuid4().hex}{ext}"
             save_path = os.path.join(app.config["UPLOAD_FOLDER"], new_name)
             os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-            uploaded_file.save(save_path)
+            uploaded_avatar.save(save_path)
             user_avatar_path = new_name
+            
+        if uploaded_cover and uploaded_cover.filename != "" and allowed_file(uploaded_cover.filename):
+            ext = os.path.splitext(uploaded_cover.filename)[1]
+            new_name = f"{uuid.uuid4().hex}{ext}"
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], new_name)
+            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+            uploaded_cover.save(save_path)
+            user_cover_path = new_name
+            
 
 
         # Connect to the database
-        q = "UPDATE users SET user_email = %s, user_username = %s, user_first_name = %s, user_last_name = %s, user_avatar_path=%s, user_bio = %s WHERE user_pk = %s"
+        q = "UPDATE users SET user_email = %s, user_username = %s, user_first_name = %s, user_last_name = %s, user_avatar_path=%s, user_bio = %s, user_cover_path=%s WHERE user_pk = %s"
         db, cursor = x.db()
-        cursor.execute(q, (user_email, user_username, user_first_name, user_last_name, user_avatar_path, user_bio, user["user_pk"]))
+        cursor.execute(q, (user_email, user_username, user_first_name, user_last_name, user_avatar_path, user_bio, user_cover_path, user["user_pk"]))
         db.commit()
         
         user["user_avatar_path"]= user_avatar_path
+        user["user_cover_path"]= user_cover_path
         session["user"] = user
 
         
@@ -604,6 +606,7 @@ def api_update_profile():
             <browser mix-update="#profile_tag .name">{user_first_name}</browser>
             <browser mix-update="#profile_tag .handle">{user_username}</browser>
             <browser mix-replace="#profil_tag img"><img src="/static/uploads/{user_avatar_path}" alt="profil"></browser>
+            <browser mix-replace="#cover_tag img"><img src="/static/uploads/{user_cover_path}" alt="cover"></browser>
             
         """, 200
     except Exception as ex:
@@ -692,7 +695,7 @@ def api_delete_profile():
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
 
-##############################
+############################## SEARCH
 @app.post("/api-search")
 def api_search():
     try:
@@ -713,55 +716,6 @@ def api_search():
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
 
-#####################################
-@app.get("/get-data-from-sheet")
-def get_data_from_sheet():
-    try:
-
-        # Check if the admin is running this end-point, else show error
-
-        # flaskwebmail
-        # Create a google sheet
-        # share and make it visible to "anyone with the link"
-        # In the link, find the ID of the sheet. Here: 1aPqzumjNp0BwvKuYPBZwel88UO-OC_c9AEMFVsCw1qU
-        # Replace the ID in the 2 places bellow
-        url= f"https://docs.google.com/spreadsheets/d/{x.google_spread_sheet_key}/export?format=csv&id={x.google_spread_sheet_key}"
-        res=requests.get(url=url)
-        # ic(res.text) # contains the csv text structure
-        csv_text = res.content.decode('utf-8')
-        csv_file = io.StringIO(csv_text) # Use StringIO to treat the string as a file
-        
-        # Initialize an empty list to store the data
-        data = {}
-
-        # Read the CSV data
-        reader = csv.DictReader(csv_file)
-        ic(reader)
-        # Convert each row into the desired structure
-        for row in reader:
-            item = {
-                    'english': row['english'],
-                    'danish': row['danish'],
-                    'spanish': row['spanish']
-                
-            }
-            # Append the dictionary to the list
-            data[row['key']] = (item)
-
-        # Convert the data to JSON
-        json_data = json.dumps(data, ensure_ascii=False, indent=4) 
-        # ic(data)
-
-        # Save data to the file
-        with open("dictionary.json", 'w', encoding='utf-8') as f:
-            f.write(json_data)
-
-        return "ok"
-    except Exception as ex:
-        ic(ex)
-        return str(ex)
-    finally:
-        pass
 
 ########################################
 @app.route("/reset-password", methods=["GET"])
@@ -785,10 +739,7 @@ def reset_password_page():
         cursor.close()
         db.close()
 
-
-
-
-##################################################
+################################################## LIKE 
 @app.route("/api-toggle-like", methods=["POST"])
 def api_toggle_like():
     try:
@@ -1055,8 +1006,11 @@ def api_delete_post(post_pk):
         cursor.execute(q_delete, (post_pk,))
         db.commit()
         
+        toast_ok = render_template("___toast_ok.html", message="Your post was deleted")
+
         # Fjern post elementet fra DOM
-        return f"""<browser mix-remove="[data-post-pk='{post_pk}']"></browser>"""
+        return f"""<browser mix-remove="[data-post-pk='{post_pk}']"></browser>
+        <browser mix-bottom="#toast">{toast_ok}</browser>"""
     
     except Exception as ex:
         ic(ex)
@@ -1241,6 +1195,74 @@ def api_toggle_follow():
     finally:
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
+
+############## GET FOLLOWERS ################
+@app.get("/followers-list")
+def followers_list():
+    try:
+        user = session.get("user", "")
+        if not user:
+            return redirect(url_for("login"))
+        
+        db, cursor = x.db()
+        
+        # Hent alle der følger brugeren + tjek om du følger dem tilbage
+        q = """
+        SELECT 
+            users.*,
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 FROM follows 
+                    WHERE follow_follower_fk = %s 
+                    AND follow_following_fk = users.user_pk
+                ) THEN 1 
+                ELSE 0 
+            END as is_following
+        FROM follows
+        JOIN users ON follows.follow_follower_fk = users.user_pk
+        WHERE follows.follow_following_fk = %s
+        """
+        cursor.execute(q, (user["user_pk"], user["user_pk"]))
+        followers = cursor.fetchall()
+        
+        followers_html = render_template("___followers_list.html", followers=followers, user=user)
+        return f"""<browser mix-update="main">{followers_html}</browser>"""
+        
+    except Exception as ex:
+        ic(ex)
+        return "error", 500
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+############## GET FOLLOWING ################
+@app.get("/following-list")
+def following_list():
+    try:
+        user = session.get("user", "")
+        if not user:
+            return redirect(url_for("login"))
+        
+        db, cursor = x.db()
+        
+        # Hent alle brugeren følger
+        q = """
+        SELECT users.*
+        FROM follows
+        JOIN users ON follows.follow_following_fk = users.user_pk
+        WHERE follows.follow_follower_fk = %s
+        """
+        cursor.execute(q, (user["user_pk"],))
+        following = cursor.fetchall()
+        
+        following_html = render_template("___following_list.html", following=following, user=user)
+        return f"""<browser mix-update="main">{following_html}</browser>"""
+        
+    except Exception as ex:
+        ic(ex)
+        return "error", 500
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
 #################################################################
 ############################ ADMIN ##############################
 @app.get("/admin")
@@ -1295,11 +1317,11 @@ def admin_block_user(user_pk):
         email_user_is_blocked = render_template("_email_user_is_blocked.html")
         email_user_is_unblocked = render_template("_email_user_is_unblocked.html")
         
-        # Send an email to the user depending on their new blocked status
+        # Send an email to the user depending on their new blocked status (POSITIONELLE ARGUMENTER)
         if row["user_is_blocked"]:
-            x.send_email(user_email=user_email, subject="You have been blocked from X", template=email_user_is_blocked)
+            x.send_email(user_email, "You have been blocked from X", email_user_is_blocked)
         else:
-            x.send_email(user_email=user_email, subject="You have been unblocked from X", template=email_user_is_unblocked)     
+            x.send_email(user_email, "You have been unblocked from X", email_user_is_unblocked)     
 
         block_unblock_html = render_template("___block_unblock_user.html", row=row)
         admin_html = render_template("_admin.html", rows=rows, blocked_rows=blocked_rows)
@@ -1314,7 +1336,6 @@ def admin_block_user(user_pk):
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
 
-
 ############# ADMIN-BLOCK-POST #################
 @app.post("/admin-block-post/<post_pk>")
 def admin_block_post(post_pk):
@@ -1324,13 +1345,14 @@ def admin_block_post(post_pk):
         cursor.execute(q, (post_pk,))
         db.commit()
 
-        # SQL query to fetch a specific post along with data on the user who created the post.
+        # SQL query to fetch post with user data INCLUDING email
         q = """SELECT 
         posts.*,
         users.user_first_name,
         users.user_last_name,
         users.user_username,
-        users.user_avatar_path
+        users.user_avatar_path,
+        users.user_email
         FROM posts
         JOIN users ON posts.post_user_fk = users.user_pk
         WHERE posts.post_pk = %s"""
@@ -1338,22 +1360,21 @@ def admin_block_post(post_pk):
         cursor.execute(q, (post_pk,))
         tweet = cursor.fetchone()
 
-        # SQL query to select the user who created the post, in order to get their email
-        q = "SELECT * FROM users WHERE user_pk = %s"
-        cursor.execute(q, (tweet["post_user_fk"],))
-        row = cursor.fetchone()
-
-        # The users email
-        user_email = row["user_email"]
+        # Hent email direkte fra tweet
+        user_email = tweet["user_email"]
 
         email_post_is_blocked = render_template("_email_post_is_blocked.html")
+        email_post_is_unblocked = render_template("_email_post_is_unblocked.html")
 
-        # Send an email to the user
+        # Send email hvis posten er blokeret eller unblocked
         if tweet["post_is_blocked"]:
-            x.send_email(user_email=user_email, subject="Your post has been blocked", template=email_post_is_blocked)
+            x.send_email(user_email, "Your post has been blocked", email_post_is_blocked)
+        else:
+            x.send_email(user_email, "Your post has been unblocked", email_post_is_unblocked)
 
+        user = session.get("user", "")
         block_unblock_html = render_template("___block_unblock_post.html", tweet=tweet)
-        tweet_html = render_template("_tweet.html", tweet=tweet)
+        tweet_html = render_template("_tweet.html", tweet=tweet, user=user)
         return f"""
         <browser mix-replace="#block_unblock_post_{post_pk}">{block_unblock_html}</browser>
         <browser mix-replace="#post_container_{post_pk}">{tweet_html}</browser>
@@ -1363,4 +1384,56 @@ def admin_block_post(post_pk):
         return "error"
     finally:
         if "cursor" in locals(): cursor.close()
-        if "db" in locals(): db.close()  
+        if "db" in locals(): db.close()
+
+
+@app.get("/get-data-from-sheet")
+def get_data_from_sheet():
+    try:
+
+        # Check if the admin is running this end-point, else show error
+
+        # flaskwebmail
+        # Create a google sheet
+        # share and make it visible to "anyone with the link"
+        # In the link, find the ID of the sheet. Here: 1aPqzumjNp0BwvKuYPBZwel88UO-OC_c9AEMFVsCw1qU
+        # Replace the ID in the 2 places bellow
+        url= f"https://docs.google.com/spreadsheets/d/{x.google_spread_sheet_key}/export?format=csv&id={x.google_spread_sheet_key}"
+        res=requests.get(url=url)
+        # ic(res.text) # contains the csv text structure
+        csv_text = res.content.decode('utf-8')
+        csv_file = io.StringIO(csv_text) # Use StringIO to treat the string as a file
+        
+        # Initialize an empty list to store the data
+        data = {}
+
+        # Read the CSV data
+        reader = csv.DictReader(csv_file)
+        ic(reader)
+        # Convert each row into the desired structure
+        for row in reader:
+            item = {
+                    'english': row['english'],
+                    'danish': row['danish'],
+                    'spanish': row['spanish']
+                
+            }
+            # Append the dictionary to the list
+            data[row['key']] = (item)
+
+        # Convert the data to JSON
+        json_data = json.dumps(data, ensure_ascii=False, indent=4) 
+        # ic(data)
+
+        # Save data to the file
+        with open("dictionary.json", 'w', encoding='utf-8') as f:
+            f.write(json_data)
+
+        toast_ok = render_template("___toast_ok.html", message="Dictionary updated")
+        return f"""
+                <browser mix-bottom="#toast">{toast_ok}</browser>"""
+    except Exception as ex:
+        ic(ex)
+        return str(ex)
+    finally:
+        pass

@@ -1,0 +1,34 @@
+<div class="following-page">
+    <div class="profile-header">
+        <a href="/profile-watch" mix-get class="back-button">
+            <i class="fa-solid fa-arrow-left" style="pointer-events: none;"></i>
+        </a>
+        <div class="header-info">
+            <h2>Following</h2>
+        </div>
+    </div>
+    
+    <div class="users-list">
+        {% if following|length == 0 %}
+        <div class="empty-state">
+            <i class="fa-regular fa-user"></i>
+            <p>You're not following anybody</p>
+        </div>
+        {% else %}
+            {% for person in following %}
+            <div class="user-item">
+                <img src="{{ url_for('static', filename='uploads/' ~ (person.user_avatar_path if person.user_avatar_path else 'unknown.jpg')) }}" 
+                     class="user-avatar" 
+                     alt="Profile">
+                <div class="user-info">
+                    <p class="user-name">{{ person.user_first_name }} {{ person.user_last_name }}</p>
+                    <p class="user-username">@{{ person.user_username }}</p>
+                </div>
+                
+                {% set target_user_pk = person.user_pk %}
+                {% include "___button_unfollow.html" %}
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>

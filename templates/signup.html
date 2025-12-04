@@ -37,44 +37,41 @@
 
       </div>
 
-        <h2 id="loginTitle">Sign up to X</h2>
+        <h2 id="loginTitle">{{ lans("sign_up_to_x") }}</h2>
         <form class="x-dialog__form" action="{{ url_for('signup') }}" mix-post autocomplete="off">
 
             <div>
               <label for="user_email">
                 <span>
-                  {{ dictionary.email[lan] }}
+                  {{ lans("email") }}
                 </span>
               </label>
               <input name="user_email" id="user_email" type="text" mix-check="{{ x.REGEX_EMAIL }}">
             </div>
             <div>
-              <label for="user_username">
-                <span>{{ dictionary.username[lan] }}</span> - {{ x.USER_USERNAME_MIN }} to {{ x.USER_USERNAME_MAX }} characters
-              </label>
+              <label for="user_username">{{ lans("username") }}</label>
               <input name="user_username" id="user_username" type="text" mix-check="{{ x.REGEX_USER_USERNAME }}">
+              <p class="validation_rules">{{ lans("your_username_must_be_between") }}  {{ x.USER_USERNAME_MIN }} {{ lans("to") }} {{ x.USER_USERNAME_MAX }} {{ lans("characters") }}</p>
             </div>
             <div>
-              <label for="user_first_name">
-                <span>{{ dictionary.first_name[lan] }}</span> - {{ x.USER_FIRST_NAME_MIN }} to {{ x.USER_FIRST_NAME_MAX }} characters
-              </label>
-              <input name="user_first_name" id="user_first_name" type="text" mix-check="{{ x.REGEX_USER_USERNAME }}">
+              <label for="user_first_name">{{ lans("first_name") }}</label>
+              <input name="user_first_name" id="user_first_name" type="text" mix-check="{{ x.REGEX_USER_FIRST_NAME }}">
+              <p class="validation_rules">{{ lans("your_first_name_must_be_between") }} {{ x.USER_FIRST_NAME_MIN }} {{ lans("to") }} {{ x.USER_FIRST_NAME_MAX }} {{ lans("characters") }}</p>
             </div>            
             <div>
-              <label for="password">
-                <span>{{ dictionary.password[lan] }}</span> - {{ x.USER_PASSWORD_MIN }} to {{ x.USER_PASSWORD_MAX }} characters
-              </label>              
+              <label for="password">{{ lans("password") }}</label>              
               <input name="user_password" id="password" type="password" mix-check="{{ x.REGEX_USER_PASSWORD }}">
+              <p class="validation_rules">{{ lans("your_password_must_be_between") }} {{ x.USER_PASSWORD_MIN }} {{ lans("to") }} {{ x.USER_PASSWORD_MAX }} {{ lans("characters") }}</p>
             </div>
             <button class="x-dialog__btn" 
             mix-default="Sign up" 
-            mix-await="Signing up...">
-                Sign up
+            mix-await="{{ lans('signing_up') }}...">
+            {{ lans("sign_up") }}
             </button>
         </form>
         <p class="x-dialog__alt">
-          {{ x.lans("have_an_account") }}
-            <a href="{{ url_for('login') }}">Log in</a>
+          {{ lans("have_an_account") }}
+            <a href="{{ url_for('login') }}">{{ lans("log_in") }}</a>
         </p>
     </div>
 
