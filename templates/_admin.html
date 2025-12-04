@@ -1,10 +1,20 @@
 <h1>
-    Admin panel
+    {{ lans("admin_panel") }}
 </h1>
 
 <section>
-    <h2>All users</h2>
-    {% for row in rows: %}
-    {% include "_user.html" %}
-    {% endfor %}
+    <section>
+        <h2>{{ lans("active_users") }}</h2>
+        <div id="unblocked_user_list">
+            {% for row in rows: %}
+            {% include "_user.html" %}
+            {% endfor %}
+        </div>
+    
+        <div id="blocked_user_list">
+            <h2>{{ lans("blocked_users") }}</h2>
+            {% for row in blocked_rows: %}
+            {% include "_user.html" %}
+            {% endfor %}
+        </div>
 </section>

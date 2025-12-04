@@ -8,7 +8,7 @@
     <div class="post_container">
         {% if tweet.post_is_blocked %}
         <div class="blocked_post_overlay">
-            <p>This post is blocked</p>
+            <p>{{ lans("this_post_is_blocked") }}</p>
         </div>
         {% endif %}
 
@@ -23,14 +23,14 @@
             </span>
             <span class="handle">@{{ tweet.user_username }}</span> · <span class="time">{{ x.format_relative_time(tweet.post_created_at) }}</span>
             {% if user.user_pk == tweet.post_user_fk %}
-            <button class="edit-post-btn" mix-get="/edit-post/{{ tweet.post_pk }}" title="Edit post">
+            <button class="edit-post-btn" mix-get="/edit-post/{{ tweet.post_pk }}" title="{{ lans('edit_post') }}">
                 <i class="fa-solid fa-pen pointer-e-none"></i>
             </button>
             {% endif %}
             <!-- Delete button - kun synlig for post ejeren -->
             {% if user and user.user_pk == tweet.post_user_fk %}
             <form action="/api-delete-post/{{ tweet.post_pk }}" mix-delete style="display:inline; margin-left: auto;" 
-                mix-delay="3000" mix-await="Deleting post...">
+                mix-delay="3000" mix-await="{{ lans('deleting_post') }}...">
                 <button type="submit" class="action text-c-red" style="pointer-events: none;" hover="cursor-pointer">
                     <i class="fa-solid fa-trash" ></i>
                 </button>
@@ -83,7 +83,7 @@
                     <input type="hidden" name="post_pk" value="{{ tweet.post_pk }}">
                     
                     <textarea name="comment_message" 
-                              placeholder="Write a comment..." 
+                              placeholder="{{lans('write_a_comment')}}..." 
                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 20px; resize: none; margin-bottom: 10px; display: block;"
                               rows="2"
                               maxlength="250"
@@ -94,7 +94,7 @@
                               onmouseover="this.style.background='#1a91da'"
                               onmouseout="this.style.background='#1da1f2'"
                               style="background: #1da1f2; color: white; width:100%; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; display: block; margin-left: auto; transition: background 0.2s ease;">
-                          Comment
+                          {{lans("comment")}}
                       </button>
                 </form>
             </div>

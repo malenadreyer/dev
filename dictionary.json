@@ -369,11 +369,26 @@
         "danish": "Post dit svar",
         "spanish": "Publica tu respuesta"
     },
+    "replies": {
+        "english": "Replies",
+        "danish": "Svar",
+        "spanish": "Respuestas"
+      },
     "commenting": {
         "english": "Commenting",
         "danish": "Kommenterer",
         "spanish": "Comentando"
     },
+    "comment": {
+        "english": "Comment",
+        "danish": "Kommenter",
+        "spanish": "Comentar"
+      },
+      "write_a_comment": {
+    "english": "Write a comment...",
+    "danish": "Skriv en kommentar...",
+    "spanish": "Escribe un comentario..."
+  },
     "reply": {
         "english": "Reply",
         "danish": "Svar",
@@ -414,10 +429,10 @@
         "danish": "Søg",
         "spanish": "Buscar"
     },
-    "search_x": {
-        "english": "Search X",
-        "danish": "Søg på X",
-        "spanish": "Buscar en X"
+    "search_twitter": {
+        "english": "Search twitter",
+        "danish": "Søg på twitter",
+        "spanish": "Buscar en twitter"
     },
     "what_is_happening_now": {
         "english": "What's happening now",
@@ -474,11 +489,21 @@
         "danish": "Opdaterer profil",
         "spanish": "Actualizando perfil"
     },
+    "cover_image": {
+        "english": "Cover Image",
+        "danish": "Coverbillede",
+        "spanish": "Imagen de portada"
+      },
     "profile_updated_successfully": {
         "english": "Profile updated successfully",
         "danish": "Profil opdateret med succes",
         "spanish": "Perfil actualizado con éxito"
     },
+    "profile_bio": {
+    "english": "Profile bio",
+    "danish": "Profilbiografi",
+    "spanish": "Biografía del perfil"
+  },
     "profile_picture": {
         "english": "Profile Picture",
         "danish": "Profilbillede",
@@ -534,11 +559,16 @@
         "danish": "Ingen opslag endnu",
         "spanish": "Aún no hay publicaciones"
     },
-    "delete_profile": {
-        "english": "Delete profile",
-        "danish": "Slet profil",
-        "spanish": "Eliminar perfill"
-    },
+    "delete": {
+        "english": "Delete",
+        "danish": "Slet",
+        "spanish": "Eliminar"
+      },
+    "delete_account": {
+        "english": "Delete account",
+        "danish": "Slet konto",
+        "spanish": "Eliminar cuenta"
+      },
     "are_you_sure": {
         "english": "Are you sure you want to delete your profile?",
         "danish": "Er du sikker på at du vil slette din profil?",

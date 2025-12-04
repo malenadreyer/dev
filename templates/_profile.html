@@ -1,111 +1,56 @@
 <h1>
-    {{ dictionary.profile[lan] }}
+    {{ lans("edit_profile") }}
 </h1>
 
 <form class="x-dialog__form" action="{{ url_for('api_update_profile') }}" mix-post autocomplete="off" enctype="multipart/form-data">
     <div>
-        <label for="user_avatar_path">Profil Image</label>
+        <label for="user_avatar_path">{{lans("profile_picture")}}</label>
         <input type="file" name="user_avatar_path" id="user_avatar_path" accept="image/*" >
     </div>
     <div>
-        <label for="user_cover_path">Cover Image</label>
+        <label for="user_cover_path">{{lans("cover_image")}}</label>
         <input type="file" name="user_cover_path" id="user_cover_path" accept="image/*" >
     </div>
     
     <div>
         <label for="user_bio">
-        <span>Profil bio</span>{{ x.BIO_MIN }} to {{ x.BIO_MAX }}
+        <span>{{lans("profile_bio")}}</span>{{ x.BIO_MIN }} {{lans("to")}} {{ x.BIO_MAX }}
         </label>
         <textarea name="user_bio" id="user_bio" mix-check="{{ x.REGEX_BIO }}" >{{ user.user_bio if user.user_bio else '' }}</textarea>
     </div>
     <div>
         <label for="user_email">
-        <span>{{ dictionary.email[lan] }}</span>
+        <span>{{ lans("email") }}</span>
         </label>
         <input name="user_email" id="user_email" type="text" mix-check="{{ x.REGEX_EMAIL }}" value="{{ user.user_email }}">
     </div>
     <div>
         <label for="user_username">
-        <span>{{ dictionary.username[lan] }}</span> - {{ x.USER_USERNAME_MIN }} {{ dictionary.to[lan] }} {{ x.USER_USERNAME_MAX }} {{ dictionary.characters[lan] }}
+        <span>{{ lans("username") }}</span> - {{ x.USER_USERNAME_MIN }} {{ lans("to") }} {{ x.USER_USERNAME_MAX }} {{ lans("characters") }}
         </label>
         <input name="user_username" id="user_username" type="text" mix-check="{{ x.REGEX_USER_USERNAME }}" value="{{ user.user_username }}">
     </div>
     <div>
         <label for="user_first_name">
-        <span>{{ dictionary.first_name[lan] }}</span> - {{ x.USER_FIRST_NAME_MIN }} {{ dictionary.to[lan] }} {{ x.USER_FIRST_NAME_MAX }} {{ dictionary.characters[lan] }}
+        <span>{{ lans("first_name") }}</span> - {{ x.USER_FIRST_NAME_MIN }} {{ lans("to") }} {{ x.USER_FIRST_NAME_MAX }} {{ lans("characters") }}
         </label>
         <input name="user_first_name" id="user_first_name" type="text" mix-check="{{ x.REGEX_USER_USERNAME }}" value="{{ user.user_first_name }}">
     </div> 
     <div>
         <label for="user_last_name">
-        <span>{{ dictionary.last_name[lan] }}</span> - {{ x.USER_FIRST_NAME_MIN }} {{ dictionary.to[lan] }} {{ x.USER_FIRST_NAME_MAX }} {{ dictionary.characters[lan] }}
+        <span>{{ lans("last_name") }}</span> - {{ x.USER_FIRST_NAME_MIN }} {{ lans("to") }} {{ x.USER_FIRST_NAME_MAX }} {{ lans("characters") }}
         </label>
         <input name="user_last_name" id="user_last_name" type="text"  value="{{ user.user_last_name }}">
     </div>            
     <button class="x-dialog__btn"  
-    mix-default="{{ dictionary.update_profile[lan] }}" 
-    mix-await="Updating profile ...">
-        Update profile
+    mix-default="{{ lans('update_profile') }}" 
+    mix-await="{{lans('updating_profile')}} ...">
+        {{lans("update_profile")}}
     </button>
 </form>
 <div class="py-8 d-flex flex-col a-items-center">
     <a href="/delete-profile" mix-get mix-target="#delete-dialog-container" class="text-c-red" hover="cursor-pointer">
-        Delete account
+        {{lans("delete_account")}}
     </a>
 </div>
 <div id="delete-dialog-container"></div>
-
-
-
-
-<script>
- document.querySelector('#profileForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    console.log('Form submitted!');
-
-    const formData = new FormData(this);
-    const fileInput = document.querySelector('input[name="user_avatar_path"]');
-    
-    console.log('File input:', fileInput);
-    console.log('Files:', fileInput ? fileInput.files : 'no input');
-
-    const response = await fetch(this.action, {
-        method: 'POST',
-        body: formData
-    });
-
-    const html = await response.text();
-    console.log('Response HTML:', html);
-    
-    document.querySelector('#toast').innerHTML = html;
-
-    // Opdater profilbillede hvis der blev uploaded en ny
-    if(fileInput && fileInput.files.length > 0){
-        console.log('Updating image with FileReader...');
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            console.log('Image loaded, updating src...');
-            
-            const profileImage = document.querySelector('#profileImage');
-            const profileTagImg = document.querySelector('#profile_tag img');
-            
-            console.log('profileImage element:', profileImage);
-            console.log('profile_tag img element:', profileTagImg);
-            
-            if(profileImage) {
-                profileImage.src = e.target.result;
-                console.log('Updated #profileImage');
-            }
-            
-            if(profileTagImg) {
-                profileTagImg.src = e.target.result;
-                console.log('Updated #profile_tag img');
-            }
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-    } else {
-        console.log('No file selected');
-    }
-});
-    </script>

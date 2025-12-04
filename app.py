@@ -432,6 +432,8 @@ def home_comp():
 @app.get("/profile")
 def profile():
     try:
+       
+ 
         user = session.get("user", "")
 
         if not user: return "error"
@@ -550,9 +552,13 @@ def api_create_post():
 
 ############################## UPDATE PROFIL ###################################################
 @app.route("/api-update-profile", methods=["POST"])
-def api_update_profile():
+@app.route("/api-update-profile/<lans>", methods=["POST"])
+def api_update_profile(lan="english"):
 
     try:
+        if lan not in x.allowed_languages:
+            lan = "english" 
+        x.default_language = lan
         lan = session["user"]["user_language"]
         
 

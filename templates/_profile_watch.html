@@ -19,7 +19,7 @@
             <!-- Edit profil knap -->
             <a href="/profile" mix-get class="edit-profile-btn">
                 <i class="fa-regular fa-pen-to-square"></i>
-                Edit profile
+                {{lans("edit_profile")}}
             </a>
         </div>
 
@@ -43,13 +43,13 @@
                 <div class="stat-item">
                     <a href="/following-list" mix-get class="stat-link">
                         <span class="stat-number">{{user.user_following}}</span>
-                        <span class="stat-label" style="pointer-events: none;">Following</span>
+                        <span class="stat-label" style="pointer-events: none;">{{lans("following")}}</span>
                     </a>
                 </div>
                 <div class="stat-item">
                     <a href="/followers-list" mix-get class="stat-link">
                         <span class="stat-number">{{user.user_followers}}</span>
-                        <span class="stat-label" style="pointer-events: none;">Followers</span>
+                        <span class="stat-label" style="pointer-events: none;">{{lans("followers")}}</span>
                     </a>
                 </div>
             </div>
@@ -59,16 +59,16 @@
     <!-- Tabs navigation -->
     <div class="profile-tabs">
         <button class="tab-btn active">
-            Posts
+            {{lans("posts")}}
         </button>
         <button class="tab-btn">
-            Replies
+            {{lans("replies")}}
         </button>
         <button class="tab-btn">
-            Media
+            {{lans("media")}}
         </button>
         <button class="tab-btn">
-            Likes
+            {{lans("likes")}}
         </button>
     </div>
 
@@ -76,7 +76,7 @@
     {% if tweets|length == 0 %}
     <div class="no-posts">
         <i class="fa-regular fa-comment"></i>
-        <p>No posts yet</p>
+        <p>{{lans("no_posts_yet")}}</p>
     </div>
 {% else %}
     {% for tweet in tweets %}
