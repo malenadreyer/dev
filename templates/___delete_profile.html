@@ -1,20 +1,20 @@
 <div class="overlay-backdrop">
     <dialog id="delete-dialog" class="delete-dialog" open>
         <div class="delete-dialog__content">
-            <h2 class="delete-dialog__title">Delete account?</h2>
+            <h2 class="delete-dialog__title">{{lans("delete_account")}}?</h2>
             <p class="delete-dialog__text">
-                This will permanently delete your account. You won't be able to log in again. This can't be undone.
+                {{lans("delete_account_warning")}}    
             </p>
             
             <div class="delete-dialog__actions">
                 <button onclick="this.closest('.overlay-backdrop').remove()" class="delete-dialog__btn delete-dialog__btn--cancel">
-                    Cancel
+                    {{(lans"cancel")}}
                 </button>
                 <a href="/api-delete-profile" 
                    mix-delete 
-                   mix-await="Deleting..." 
+                   mix-await="{{lans('deleting_profile')}}..." 
                    class="delete-dialog__btn delete-dialog__btn--delete">
-                    Delete
+                    {{lans("delete")}}
                 </a>
             </div>
         </div>

@@ -101,7 +101,7 @@ def login(lan = "english"):
                 raise Exception(dictionary.user_not_verified[lan], 400)
 
             user.pop("user_password")
-            # TODO: add the default langauge to the user
+
             user["user_language"] = lan
             session["user"] = user
             return f"""<browser mix-redirect="/home"></browser>"""
@@ -111,7 +111,7 @@ def login(lan = "english"):
 
             # User errors
             if ex.args[1] == 400:
-                toast_error = render_template("___toast_error.html", message=ex.args[0])
+                toast_error = render_template("___toast_error.html", message=ex.x.lans("wrong_password_or_email"))
                 return f"""<browser mix-update="#toast">{ toast_error }</browser>""", 400
 
             # System or developer error
@@ -185,7 +185,7 @@ def signup(lan = "english"):
                     return f"""<mixhtml mix-redirect="{ url_for('login') }"></mixhtml>""", 200
                 else:
                     # Email er allerede i brug af en aktiv konto
-                    toast_error = render_template("___toast_error.html", message="Email already registered")
+                    toast_error = render_template("___toast_error.html", message=x.lans("email_already_registered"))
                     return f"""<mixhtml mix-update="#toast">{ toast_error }</mixhtml>""", 400
             
             # Hvis email ikke findes, opret ny bruger
@@ -242,7 +242,7 @@ def forgot_password():
 
         # Fetch user by email
         db, cursor = x.db()
-        q = "SELECT user_pk FROM users WHERE user_email = %s AND user_deleted_at = 0"
+        q = "SELECT * FROM users WHERE user_email = %s"
         cursor.execute(q, (user_email,))
         user = cursor.fetchone()
 
@@ -262,7 +262,7 @@ def forgot_password():
         # Send the reset email (pass only the reset token)
         x.send_reset_email(user_email, reset_token)
 
-        toast = render_template("___toast_ok.html", message= "A reset link has been to your email.")
+        toast = render_template("___toast_ok.html", message=x.lans("reset_link_sent"))
         return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 200
 
     except Exception as ex:
@@ -303,7 +303,7 @@ def reset_password_post():
             (hashed, user["user_pk"])
         )
         db.commit()
-        toast = render_template("___toast_ok.html", message="Password updated successfully")
+        toast = render_template("___toast_ok.html", message=x.lans("password_updated_successfully"))
         return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 200
 
     except Exception as ex:
@@ -398,18 +398,37 @@ def home_comp():
         
         db, cursor = x.db()
         
-        q = """
-            SELECT 
-                posts.*,
-                users.user_first_name,
-                users.user_last_name,
-                users.user_username,
-                users.user_avatar_path,
-            FROM posts
-            JOIN users ON posts.post_user_fk = users.user_pk
-            LEFT JOIN likes ON posts.post_pk = likes.like_post_fk AND likes.like_user_fk = %s
-            LIMIT 20
-        """
+        is_admin = user.get("user_is_admin", 0)
+        
+        if is_admin:
+            q = """
+                SELECT 
+                    posts.*,
+                    users.user_first_name,
+                    users.user_last_name,
+                    users.user_username,
+                    users.user_avatar_path
+                FROM posts
+                JOIN users ON posts.post_user_fk = users.user_pk
+                LEFT JOIN likes ON posts.post_pk = likes.like_post_fk AND likes.like_user_fk = %s
+                ORDER BY posts.post_created_at DESC
+                LIMIT 20
+            """
+        else:
+            q = """
+                SELECT 
+                    posts.*,
+                    users.user_first_name,
+                    users.user_last_name,
+                    users.user_username,
+                    users.user_avatar_path
+                FROM posts
+                JOIN users ON posts.post_user_fk = users.user_pk
+                LEFT JOIN likes ON posts.post_pk = likes.like_post_fk AND likes.like_user_fk = %s
+                WHERE posts.post_is_blocked = 0
+                ORDER BY posts.post_created_at DESC
+                LIMIT 20
+            """
         cursor.execute(q, (user["user_pk"],))
         tweets = cursor.fetchall()
 
@@ -516,7 +535,7 @@ def api_create_post():
         q = "INSERT INTO posts VALUES(%s, %s, %s, %s,%s, NULL, %s, %s)"
         cursor.execute(q, (post_pk, user_pk, post, 0,0, post_created_at, 0))
         db.commit()
-        toast_ok = render_template("___toast_ok.html", message="The world is reading your post !")
+        toast_ok = render_template("___toast_ok.html", message=x.lans("the_world_is_reading_your_post"))
         tweet = {
             "user_first_name": user["user_first_name"],
             "user_last_name": user["user_last_name"],
@@ -606,7 +625,7 @@ def api_update_profile(lan="english"):
 
         
         # Response to the browser
-        toast_ok = render_template("___toast_ok.html", message="Profile updated successfully")
+        toast_ok = render_template("___toast_ok.html", message=x.lans("profile_updated_successfully"))
         return f"""
             <browser mix-bottom="#toast">{toast_ok}</browser>
             <browser mix-update="#profile_tag .name">{user_first_name}</browser>
@@ -625,10 +644,10 @@ def api_update_profile(lan="english"):
         
         # Database errors
         if "Duplicate entry" and user_email in str(ex): 
-            toast_error = render_template("___toast_error.html", message="Email already registered")
+            toast_error = render_template("___toast_error.html", message=x.lans("email_already_registered"))
             return f"""<mixhtml mix-update="#toast">{ toast_error }</mixhtml>""", 400
         if "Duplicate entry" and user_username in str(ex): 
-            toast_error = render_template("___toast_error.html", message="Username already registered")
+            toast_error = render_template("___toast_error.html", message=x.lans("username_already_registered"))
             return f"""<mixhtml mix-update="#toast">{ toast_error }</mixhtml>""", 400
         
         # System or developer error
@@ -1012,7 +1031,7 @@ def api_delete_post(post_pk):
         cursor.execute(q_delete, (post_pk,))
         db.commit()
         
-        toast_ok = render_template("___toast_ok.html", message="Your post was deleted")
+        toast_ok = render_template("___toast_ok.html", message=x.lans("your_post_has_been_deleted"))
 
         # Fjern post elementet fra DOM
         return f"""<browser mix-remove="[data-post-pk='{post_pk}']"></browser>
@@ -1114,7 +1133,7 @@ def api_update_post(post_pk):
         tweet = cursor.fetchone()
         
         # Send success response
-        toast_ok = render_template("___toast_ok.html", message="Post updated successfully!")
+        toast_ok = render_template("___toast_ok.html", message=x.lans("post_updated_successfully!"))
         tweet_html = render_template("_tweet.html", tweet=tweet, user=user)
         
         return f"""
@@ -1134,7 +1153,7 @@ def api_update_post(post_pk):
             return f"""<browser mix-bottom="#toast">{toast_error}</browser>""", 400
         
         # System error
-        toast_error = render_template("___toast_error.html", message="Could not update post")
+        toast_error = render_template("___toast_error.html", message=x.lans("could_not_update_post"))
         return f"""<browser mix-bottom="#toast">{toast_error}</browser>""", 500
 
     finally:

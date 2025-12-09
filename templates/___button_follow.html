@@ -1,8 +1,8 @@
 <form id="follow-btn-{{ target_user_pk }}" mix-post="/api-toggle-follow" style="display: inline; background-color: black; ;">
     <input type="hidden" name="following_pk" value="{{ target_user_pk }}">
     <button type="submit" 
-            mix-await="Following..."
+            mix-await="{{lans('following')}}..."
             style="color: white;">
-        Follow
+        {{lans("follow")}}
     </button>
 </form>

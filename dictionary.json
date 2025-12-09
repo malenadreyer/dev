@@ -53,7 +53,17 @@
         "english": "Password",
         "danish": "Adgangskode",
         "spanish": "Clave"
-    },
+    }, 
+    "not_following": {
+        "english": "You're not following anybody",
+        "spanish": "No sigues a nadie",
+        "danish": "Du følger ikke nogen"
+      },
+      "no_followers_yet": {
+    "english": "No followers yet",
+    "spanish": "Aún no tienes seguidores",
+    "danish": "Ingen følgere endnu"
+  },
     "your_username_must_be_between": {
         "english": "Your username must be between",
         "danish": "Dit brugernavn skal være mellem",
@@ -74,6 +84,11 @@
         "danish": "Din adgangskode skal være mellem",
         "spanish": "Tu contraseña debe estar entre"
     },
+    "password_updated_successfully": {
+        "english": "Password updated successfully",
+        "spanish": "Contraseña actualizada correctamente",
+        "danish": "Adgangskode opdateret med succes"
+      },
     "to": {
         "english": "to",
         "danish": "til",
@@ -329,6 +344,11 @@
         "danish": "Fjerner blokering",
         "spanish": "Desbloqueando"
     },
+    "delete_account_warning": {
+    "english": "This will permanently delete your account. You won't be able to log in again. This can't be undone.",
+    "spanish": "Esto eliminará permanentemente tu cuenta. No podrás volver a iniciar sesión. Esto no se puede deshacer.",
+    "danish": "Dette vil permanent slette din konto. Du vil ikke kunne logge ind igen. Dette kan ikke fortrydes."
+  },
     "this_post_is_blocked": {
         "english": "This post is blocked",
         "danish": "Dette opslag er blokeret",
@@ -369,6 +389,11 @@
         "danish": "Post dit svar",
         "spanish": "Publica tu respuesta"
     },
+    "post_updated_successfully": {
+    "english": "Post updated successfully",
+    "spanish": "Publicación actualizada correctamente",
+    "danish": "Opslag opdateret med succes"
+  },
     "replies": {
         "english": "Replies",
         "danish": "Svar",
@@ -394,6 +419,11 @@
         "danish": "Svar",
         "spanish": "Responder"
     },
+    "wrong_password_or_email": {
+    "english": "Wrong password or email",
+    "spanish": "Contraseña o correo electrónico incorrecto",
+    "danish": "Forkert adgangskode eller e-mail"
+  },
     "edit_post": {
         "english": "Edit post",
         "danish": "Rediger opslag",
@@ -459,11 +489,11 @@
         "danish": "Vis mere",
         "spanish": "Mostrar más"
     },
-    "unfollow": {
-        "english": "Unfollow",
-        "danish": "Fjern ",
-        "spanish": "Eliminar"
-    },
+    "unfollowing": {
+        "english": "Unfollowing",
+        "spanish": "Dejar de seguir",
+        "danish": "Følger ikke længere"
+      },
     "followers": {
         "english": "Followers",
         "danish": "Følgere",
@@ -569,6 +599,11 @@
         "danish": "Slet konto",
         "spanish": "Eliminar cuenta"
       },
+      "could_not_update_post": {
+        "english": "Could not update post",
+        "spanish": "No se pudo actualizar la publicación",
+        "danish": "Kunne ikke opdatere opslag"
+      },
     "are_you_sure": {
         "english": "Are you sure you want to delete your profile?",
         "danish": "Er du sikker på at du vil slette din profil?",
@@ -629,6 +664,16 @@
         "danish": "Dit opslag er blevet ophævet fra blokering og er nu synligt på X igen.",
         "spanish": "Tu publicación ha sido desbloqueada y ahora vuelve a ser visible en X."
     },
+    "unblock_post": {
+        "english": "Unblock post",
+        "spanish": "Desbloquear publicación",
+        "danish": "Fjern blokering af opslag"
+      },
+      "block_post": {
+        "english": "Block post",
+        "spanish": "Bloquear publicación",
+        "danish": "Bloker opslag"
+      },
     "reset_your_password": {
         "english": "Reset your password",
         "danish": "Nulstil din adgangskode",
@@ -658,6 +703,11 @@
     "english": "Send reset link",
     "danish": "Send nulstillingslink",
     "spanish": "Enviar enlace de restablecimiento"
+  },
+  "reset_link_sent": {
+    "english": "A reset link has been sent to your email.",
+    "spanish": "Se ha enviado un enlace de restablecimiento a tu correo electrónico.",
+    "danish": "Et nulstillingslink er blevet sendt til din e-mail."
   },
   "sending": {
     "english": "Sending",

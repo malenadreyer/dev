@@ -4,7 +4,7 @@
             <i class="fa-solid fa-arrow-left" style="pointer-events: none;"></i>
         </a>
         <div class="header-info" style="pointer-events: none;">
-            <h2>Followers</h2>
+            <h2>{{lans("followers")}}</h2>
         </div>
     </div>
     
@@ -12,7 +12,7 @@
         {% if followers|length == 0 %}
         <div class="empty-state">
             <i class="fa-regular fa-user"></i>
-            <p>No followers yet</p>
+            <p>{{lans("no_followers_yet")}}</p>
         </div>
         {% else %}
             {% for follower in followers %}

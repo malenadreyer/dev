@@ -1,10 +1,10 @@
 <div id="block_unblock_user_{{ row.user_pk }}" class="dropdown-menu">
     <a href="/admin-block-user/{{ row.user_pk }}" mix-post
-        mix-await="{% if row.user_is_blocked %}Unblocking...{% else %}Blocking...{% endif %}">
+        mix-await="{% if row.user_is_blocked %}{{lans('unblocking')}}...{% else %}Blocking...{% endif %}">
         {% if row.user_is_blocked %}
-        Unblock user
+        {{lans("unblock_user")}}
         {% else %}
-        Block user
+        {{lans("block_user")}}
         {% endif %}
     </a>
 </div>
