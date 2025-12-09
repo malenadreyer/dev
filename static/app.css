@@ -268,7 +268,7 @@ p{
 
             &:hover {
               background-color: rgba(29, 155, 240, 0.1);
-              color: rgb(29, 155, 240);
+              color: rgb(46, 46, 46);
             }
           }
         }
@@ -414,7 +414,7 @@ p{
       background-color: transparent;
       width: 100%;
       padding: 0.8rem 1rem;
-      color: rgb(29, 155, 240);
+      color: rgb(72, 72, 72);
       text-align: left;
       cursor: pointer;
       font-size: 0.9rem;
@@ -641,7 +641,7 @@ p{
   font-size: 0.9rem;
 }
 .x-dialog__alt a {
-  color: #1d9bf0;
+  color: #222;
   text-decoration: none;
 }
 .x-dialog__alt a:hover {
@@ -654,6 +654,48 @@ p{
   margin: 0 auto;
   position: relative;
 
+}
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.label-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: #0f1419;
+}
+
+.label-hint {
+  font-size: 13px;
+  color: #536471;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid #cfd9de;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+
+
+.char-counter {
+  display: block;
+  text-align: right;
+  font-size: 13px;
+  color: #536471;
+  margin-top: 4px;
 }
 
 .profile-cover {
@@ -832,7 +874,7 @@ p{
   transform: translateX(-50%);
   width: 60px;
   height: 4px;
-  background: #1d9bf0;
+  background: #222;
   border-radius: 4px 4px 0 0;
 }
 
@@ -934,9 +976,7 @@ p {
   color: #d6005f;
 }
 /* ------------------------------EDIT POST------------------------------ */
-.edit-post-page {
-  /* Container styling hvis nødvendigt */
-}
+
 
 .edit-post-page .profile-header {
   border-bottom: 1px solid #eff3f4;
@@ -967,7 +1007,7 @@ p {
 }
 
 .edit-post-page .btn-save {
-  background: #1d9bf0;
+  background: black;
   color: white;
   border: none;
   border-radius: 20px;
@@ -977,9 +1017,6 @@ p {
   cursor: pointer;
 }
 
-.edit-post-page .btn-save:hover {
-  background: #1a8cd8;
-}
 
 .edit-post-wrapper {
   padding: 16px;
@@ -1027,9 +1064,7 @@ p {
   font-size: 13px;
 }
 
-.edit-post-char-count {
-  color: #1d9bf0;
-}
+
 /* ------------------------------DELETE BOX------------------------------ */
 .overlay-backdrop {
   position: fixed;

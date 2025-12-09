@@ -71,7 +71,7 @@ USER_USERNAME_MAX = 20
 REGEX_USER_USERNAME = f"^.{{{USER_USERNAME_MIN},{USER_USERNAME_MAX}}}$"
 def validate_user_username(lan="en"):
     user_username = request.form.get("user_username", "").strip()
-    error = f"{dictionary.username[lan]} {USER_USERNAME_MIN} {dictionary.to[lan]} {USER_USERNAME_MAX} {dictionary.characters[lan]}"
+    error = f"{lans('username')} {USER_USERNAME_MIN} {lans('to')} {USER_USERNAME_MAX} {lans('characters')}"
     if len(user_username) < USER_USERNAME_MIN: raise Exception(error, 400)
     if len(user_username) > USER_USERNAME_MAX: raise Exception(error, 400)  
     return user_username
@@ -82,7 +82,7 @@ USER_FIRST_NAME_MAX = 20
 REGEX_USER_FIRST_NAME = f"^.{{{USER_FIRST_NAME_MIN},{USER_FIRST_NAME_MAX}}}$"
 def validate_user_first_name(lan="en"):
     user_first_name = request.form.get("user_first_name", "").strip()
-    error = f"{dictionary.first_name[lan]} {USER_FIRST_NAME_MIN} {dictionary.to[lan]} {USER_FIRST_NAME_MAX} {dictionary.characters[lan]}"
+    error = f"{lans('first_name')} {USER_FIRST_NAME_MIN} {lans('to')} {USER_FIRST_NAME_MAX} {lans('characters')}"
     if not re.match(REGEX_USER_FIRST_NAME, user_first_name): raise Exception(error, 400)
     return user_first_name
 

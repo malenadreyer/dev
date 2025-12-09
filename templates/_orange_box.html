@@ -12,9 +12,9 @@ border-1 border-c-gray:+50 rounded-sm">
             
             </div>
             {% if user.is_following %}
-            {% include "___button_unfollow.html" with context %}
+            {% include "___button_unfollow.html" %}
         {% else %}
-            {% include "___button_follow.html" with context %}
+            {% include "___button_follow.html" %}
         {% endif %}        </div>
     {% endfor %}
 </div>

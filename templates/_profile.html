@@ -12,11 +12,25 @@
         <input type="file" name="user_cover_path" id="user_cover_path" accept="image/*" >
     </div>
     
-    <div>
-        <label for="user_bio">
-        <span>{{lans("profile_bio")}}</span>{{ x.BIO_MIN }} {{lans("to")}} {{ x.BIO_MAX }}
+    <div class="form-group">
+        <label for="user_bio" class="form-label">
+            <span>{{lans("profile_bio")}}</span>
+            <span class="label-hint">{{ x.BIO_MIN }}-{{ x.BIO_MAX }} {{lans("characters")}}</span>
         </label>
-        <textarea name="user_bio" id="user_bio" mix-check="{{ x.REGEX_BIO }}" >{{ user.user_bio if user.user_bio else '' }}</textarea>
+        <textarea 
+            name="user_bio" 
+            id="user_bio" 
+            class="form-textarea" 
+            mix-check="{{ x.REGEX_BIO }}" 
+            maxlength="{{ x.BIO_MAX }}"
+            oninput="
+            const counter = document.getElementById('char-count-edit');
+            const len = this.value.length;
+            counter.textContent = len;
+            counter.style.color = len > 250 ? 'red' : (len > 230 ? 'orange' : '#1d9bf0')">{{ user.user_bio if user.user_bio else '' }}</textarea>
+        <small class="edit-post-char-counter">
+            <span id="char-count-edit" class="edit-post-char-count">{{ user.user_bio|length }}</span>/{{ x.BIO_MAX }}
+        </small>
     </div>
     <div>
         <label for="user_email">

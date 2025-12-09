@@ -134,6 +134,26 @@
         "danish": "min",
         "spanish": "mín"
     },
+    "account_reactivated": {
+    "english": "Welcome back! Your account has been reactivated",
+    "danish": "Velkommen tilbage! Din konto er blevet genaktiveret",
+    "spanish": "¡Bienvenido de nuevo! Tu cuenta ha sido reactivada"
+  },
+  "account_created_check_email": {
+    "english": "Account created! Please check your email to verify",
+    "danish": "Konto oprettet! Tjek venligst din email for at verificere",
+    "spanish": "¡Cuenta creada! Por favor revisa tu correo para verificar"
+  },
+  "account_deleted": {
+    "english": "Your account has been deleted successfully",
+    "danish": "Din konto er blevet slettet",
+    "spanish": "Tu cuenta ha sido eliminada exitosamente"
+  },
+  "login_successful": {
+    "english": "Welcome back!",
+    "danish": "Velkommen tilbage!",
+    "spanish": "¡Bienvenido de nuevo!"
+  },
     "max": {
         "english": "max",
         "danish": "max",
@@ -144,6 +164,11 @@
         "danish": "Ugyldig bekræftelse af adgangskode",
         "spanish": "Confirmación de contraseña no válida"
     },
+    "system_maintenance": {
+        "english": "System under maintenance. Please try again later.",
+        "danish": "System under vedligeholdelse. Prøv venligst igen senere.",
+        "spanish": "Sistema en mantenimiento. Por favor, inténtalo de nuevo más tarde."
+      },
     "log_in_to_x": {
         "english": "Log in to X",
         "danish": "Log ind til X",
@@ -485,7 +510,7 @@
         "spanish": "Seguir"
     },
     "show_more": {
-        "english": "Se mere",
+        "english": "Show more",
         "danish": "Vis mere",
         "spanish": "Mostrar más"
     },

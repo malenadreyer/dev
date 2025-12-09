@@ -38,7 +38,7 @@
       </div>
 
         <h2 id="loginTitle">{{ lans("sign_up_to_x") }}</h2>
-        <form class="x-dialog__form" action="{{ url_for('signup') }}" mix-post autocomplete="off">
+        <form class="x-dialog__form" action="{{ url_for('signup', lan=lan) }}" mix-post autocomplete="off">
 
             <div>
               <label for="user_email">
