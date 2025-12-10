@@ -27,7 +27,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "static", "uploads")
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Sørg for mappen eksisterer
+os.makedirs(UPLOAD_FOLDER, exist_ok=True) 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS ={"png", "jpg", "jpeg", "webp"}
 
@@ -195,7 +195,7 @@ def signup(lan = "english"):
             # Connect to the database
             db, cursor = x.db()
             
-            # Tjek om email allerede eksisterer (kun aktive brugere)
+    
             q_check_email = "SELECT * FROM users WHERE user_email = %s AND (user_deleted_at = 0 OR user_deleted_at IS NULL)"
             cursor.execute(q_check_email, (user_email,))
             existing_email = cursor.fetchone()
@@ -203,7 +203,7 @@ def signup(lan = "english"):
             if existing_email:
                 raise Exception(x.lans("email_already_registered"), 400)
             
-            # Tjek om username allerede eksisterer (kun aktive brugere)
+           
             q_check_username = "SELECT * FROM users WHERE user_username = %s AND (user_deleted_at = 0 OR user_deleted_at IS NULL)"
             cursor.execute(q_check_username, (user_username,))
             existing_username = cursor.fetchone()
@@ -211,13 +211,12 @@ def signup(lan = "english"):
             if existing_username:
                 raise Exception(x.lans("username_already_registered"), 400)
             
-            # Tjek om der er en soft deleted bruger med samme email
             q_check_deleted = "SELECT * FROM users WHERE user_email = %s AND user_deleted_at != 0"
             cursor.execute(q_check_deleted, (user_email,))
             deleted_user = cursor.fetchone()
             
             if deleted_user:
-                # Genaktiver den slettede konto
+                
                 import time
                 q_reactivate = """UPDATE users 
                                  SET user_deleted_at = 0, 
@@ -237,16 +236,16 @@ def signup(lan = "english"):
             # Opret ny bruger
             user_pk = uuid.uuid4().hex
             user_last_name = ""
-            user_avatar_path = ""
+            user_avatar_path = "unknown.jpg"
             user_verification_key = uuid.uuid4().hex
             user_verified_at = 0
             user_deleted_at = 0
-            user_bio = ""  # Tilføjet
-            user_followers = 0  # Tilføjet
-            user_following = 0  # Tilføjet
-            user_cover_path = ""  # Tilføjet
-            user_admin = 0  # Tilføjet
-            user_is_blocked = 0  # Tilføjet
+            user_bio = ""  
+            user_followers = 0  
+            user_following = 0  
+            user_cover_path = "unknown.jpg"  
+            user_admin = 0 
+            user_is_blocked = 0  
 
             q = """INSERT INTO users VALUES(
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
@@ -318,10 +317,10 @@ def forgot_password():
         if not user:
             raise Exception ("User not found", 400)
 
-        # Generate a reset token
+        # make a reset token
         reset_token = str(uuid.uuid4())
 
-        # Store the reset token in the database
+        # store the reset token in the database until ready
         q = "UPDATE users SET user_verification_key = %s WHERE user_pk = %s"
         cursor.execute(q, (reset_token, user["user_pk"]))
         db.commit()
@@ -329,7 +328,7 @@ def forgot_password():
         # Send the reset email
         x.send_reset_email(user_email, reset_token)
 
-        # Show success message
+        # success message
         toast = render_template("___toast_ok.html", message=x.lans("reset_link_sent"))
         return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 200
 
@@ -380,7 +379,9 @@ def reset_password_post():
         toast = render_template("___toast_error.html", message=message)
         return f"""<mixhtml mix-bottom="#toast">{toast}</mixhtml>""", 400
 
-    final
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
 
 ###############################FORGOT PASSWORD ################################
 @app.route("/forgot-password", methods=["GET"])
@@ -451,10 +452,9 @@ def verify_account():
     except Exception as ex:
         ic(ex)
         if "db" in locals(): db.rollback()
-        # User errors
         if ex.args[1] == 400: return ex.args[0], 400    
 
-        # System or developer error
+       
         return "Cannot verify user"
 
     finally:
@@ -471,10 +471,10 @@ def home_comp():
         
         db, cursor = x.db()
         
-        is_admin = user.get("user_admin", 0)  # Tjek admin status
+        is_admin = user.get("user_admin", 0)  # check if you are admin
         
         if is_admin:
-            # Admin ser alle posts
+            # Admin sees all the post
             q = """
                 SELECT 
                     posts.*,
@@ -492,7 +492,7 @@ def home_comp():
                 ORDER BY posts.post_created_at
             """
         else:
-            # Normale brugere ser kun ikke-blokerede posts fra ikke-blokerede brugere
+            # Normal users only ses the non blocked post. 
             q = """
                 SELECT 
                     posts.*,
@@ -530,11 +530,10 @@ def home_comp():
 @app.get("/profile")
 def profile():
     try:
-        # Check if user is logged in
+
         user = session.get("user", "")
         if not user: return "error"
         
-        # Fetch fresh user data from database
         q = "SELECT * FROM users WHERE user_pk = %s"
         db, cursor = x.db()
         cursor.execute(q, (user["user_pk"],))
@@ -749,18 +748,14 @@ def api_update_profile(lan="english"):
 def delete_profile():
     try:
         user = session.get("user")
-
-        # Check if user is logged in
         if not user: 
             return "error"
         
-        # Fetch fresh user data from database
         q = "SELECT * FROM users WHERE user_pk = %s"
         db, cursor = x.db()
         cursor.execute(q, (user["user_pk"],))
         row = cursor.fetchone()
 
-        # Render delete profile template
         delete_profile_html = render_template("___delete_profile.html", row=row)
         return f"""<browser mix-top="main">{ delete_profile_html }</browser>"""
 
@@ -822,7 +817,7 @@ def api_delete_profile():
         if "db" in locals(): 
             db.rollback()
         
-        toast_error = render_template("___toast_error.html", message="Could not delete account")
+        toast_error = render_template("___toast_error.html", message=x.lans("could_not_delete_account"))
         return f"""<browser mix-bottom="#toast">{toast_error}</browser>""", 500
         
     finally:
@@ -847,7 +842,7 @@ def api_search():
         db, cursor = x.db()
     
         
-        # Start med en simpel query
+        # A more simpel query, than i tried. Hard too find uery that could make me follow the persons aswell
         q = """
             SELECT * FROM users 
             WHERE (user_username LIKE %s 
@@ -912,27 +907,27 @@ def api_toggle_like():
         
         db, cursor = x.db()
         
-        # Tjek om like eksisterer
+        # Check if like is there
         q_check = "SELECT * FROM likes WHERE like_user_fk = %s AND like_post_fk = %s"
         cursor.execute(q_check, (user_pk, post_pk))
         existing = cursor.fetchone()
         
         if existing:
-            # Unlike - slet
+            # Unlike 
             q = "DELETE FROM likes WHERE like_user_fk = %s AND like_post_fk = %s"
             cursor.execute(q, (user_pk, post_pk))
             db.commit()
             
-            # Tæl likes direkte
+            # count directly
             q_count = "SELECT COUNT(*) as total FROM likes WHERE like_post_fk = %s"
             cursor.execute(q_count, (post_pk,))
             result = cursor.fetchone()
             total_likes = result["total"]
             
-            # Return like knappen (tomt hjerte)
+        
             button = render_template("___button_unlike_tweet.html", tweet={"post_pk": post_pk, "post_total_likes": total_likes})
         else:
-            # Like - opret
+            # like
             like_pk = uuid.uuid4().hex 
             like_created_at = int(time.time())
             
@@ -940,16 +935,15 @@ def api_toggle_like():
             cursor.execute(q, (like_pk, user_pk, post_pk, like_created_at))
             db.commit()
             
-            # Tæl likes direkte
+        
             q_count = "SELECT COUNT(*) as total FROM likes WHERE like_post_fk = %s"
             cursor.execute(q_count, (post_pk,))
             result = cursor.fetchone()
             total_likes = result["total"]
             
-            # Return unlike knappen (fyldt hjerte)
             button = render_template("___button_like_tweet.html", tweet={"post_pk": post_pk, "post_total_likes": total_likes})
         
-        return f"""<mixhtml mix-replace="#like-form-{post_pk}">{button}</mixhtml>"""
+        return f"""<browser mix-replace="#like-form-{post_pk}">{button}</browser>"""
 
     except Exception as ex:
         ic(ex)  
@@ -988,13 +982,13 @@ def api_create_comment():
         cursor.execute(q, (comment_pk, user_pk, post_pk, comment_message, comment_created_at))
         db.commit()
         
-        # Tæl comments direkte
+        # counts comments
         q_count = "SELECT COUNT(*) as total FROM comments WHERE comment_post_fk = %s"
         cursor.execute(q_count, (post_pk,))
         result = cursor.fetchone()
         total_comments = result["total"]
         
-        # Hent comment med bruger info
+        # get comment with users info
         q_get = """
             SELECT comments.*, users.user_first_name, users.user_last_name, 
                    users.user_username, users.user_avatar_path
@@ -1005,7 +999,7 @@ def api_create_comment():
         cursor.execute(q_get, (comment_pk,))
         comment = cursor.fetchone()
         
-        # Return den nye comment
+        
         comment_html = render_template("_comment.html", comment=comment, user=user)
         return f"""
             <mixhtml mix-top="#comments-{post_pk}">{comment_html}</mixhtml>
@@ -1045,8 +1039,6 @@ def api_delete_comment():
             return "Invalid comment", 400
         
         db, cursor = x.db()
-        
-        # Tjek at det er brugerens egen comment
         q_check = "SELECT * FROM comments WHERE comment_pk = %s AND comment_user_fk = %s"
         cursor.execute(q_check, (comment_pk, user_pk))
         comment = cursor.fetchone()
@@ -1054,20 +1046,20 @@ def api_delete_comment():
         if not comment:
             return "Not your comment", 403
         
-        # Slet comment
+        # delete comments
         q = "DELETE FROM comments WHERE comment_pk = %s"
         cursor.execute(q, (comment_pk,))
         db.commit()
         
-        # Tæl comments direkte
+        # counts comments
         q_count = "SELECT COUNT(*) as total FROM comments WHERE comment_post_fk = %s"
         cursor.execute(q_count, (post_pk,))
         result = cursor.fetchone()
         total_comments = result["total"]
         
         return f"""
-            <mixhtml mix-remove="#comment-{comment_pk}"></mixhtml>
-            <mixhtml mix-replace="#comment-count-{post_pk}"><span id="comment-count-{post_pk}">{total_comments}</span></mixhtml>
+            <browser mix-remove="#comment-{comment_pk}"></browser>
+            <browser mix-replace="#comment-count-{post_pk}"><span id="comment-count-{post_pk}">{total_comments}</span></browser>
         """
 
     except Exception as ex:
@@ -1089,13 +1081,10 @@ def api_get_comments():
             return "Unauthorized", 401
         
         post_pk = request.args.get("post_pk", "").strip()
-        
         if not post_pk:
             return "Invalid post", 400
         
         db, cursor = x.db()
-        
-        # Hent alle comments for dette post
         q = """
             SELECT comments.*, 
                    users.user_first_name, 
@@ -1109,9 +1098,6 @@ def api_get_comments():
         """
         cursor.execute(q, (post_pk,))
         comments = cursor.fetchall()
-        
-        
-        # Render alle comments
         html = ""
         for comment in comments:
             html += render_template("_comment.html", comment=comment, user=user)
@@ -1126,12 +1112,11 @@ def api_get_comments():
         if "cursor" in locals(): cursor.close()
         if "db" in locals(): db.close()
 
-
 ################################ API DELETE POST ################################
 @app.route("/api-delete-post/<post_pk>", methods=["DELETE"])
 def api_delete_post(post_pk):
     try:
-        # Hent user fra session
+
         user = session.get("user")
         
         if not user: 
@@ -1139,7 +1124,7 @@ def api_delete_post(post_pk):
         
         db, cursor = x.db()
         
-        # Tjek at brugeren ejer posten
+        # check if you won the post or not
         q_check = "SELECT * FROM posts WHERE post_pk = %s AND post_user_fk = %s"
         cursor.execute(q_check, (post_pk, user["user_pk"]))
         post = cursor.fetchone()
@@ -1147,22 +1132,20 @@ def api_delete_post(post_pk):
         if not post:
             return "Post not found or unauthorized", 404
         
-        # Slet alle comments på posten først (foreign key constraint)
+        # delete all comments on post first (foreign key constraint)
         q_delete_comments = "DELETE FROM comments WHERE comment_post_fk = %s"
         cursor.execute(q_delete_comments, (post_pk,))
         
-        # Slet alle likes på posten
+        # deletes likes from post
         q_delete_likes = "DELETE FROM likes WHERE like_post_fk = %s"
         cursor.execute(q_delete_likes, (post_pk,))
         
-        # Slet posten
+        # delewte post
         q_delete = "DELETE FROM posts WHERE post_pk = %s"
         cursor.execute(q_delete, (post_pk,))
         db.commit()
         
         toast_ok = render_template("___toast_ok.html", message=x.lans("your_post_has_been_deleted"))
-
-        # Fjern post elementet fra DOM
         return f"""<browser mix-remove="[data-post-pk='{post_pk}']"></browser>
         <browser mix-bottom="#toast">{toast_ok}</browser>"""
     
@@ -1333,7 +1316,7 @@ def api_toggle_follow():
             
             button = render_template("___button_unfollow.html", target_user_pk=following_pk)
         
-        return f"""<mixhtml mix-replace="#follow-btn-{following_pk}">{button}</mixhtml>"""
+        return f"""<browser mix-replace="#follow-btn-{following_pk}">{button}</browser>"""
     
     except Exception as ex:
         ic(ex)
@@ -1354,7 +1337,6 @@ def followers_list():
         
         db, cursor = x.db()
         
-        # Hent alle der følger brugeren + tjek om du følger dem tilbage
         q = """
         SELECT 
             users.*,
@@ -1392,7 +1374,7 @@ def following_list():
         
         db, cursor = x.db()
         
-        # Hent alle brugeren følger
+
         q = """
         SELECT users.*
         FROM follows
@@ -1540,14 +1522,10 @@ def admin_block_post(post_pk):
 
         cursor.execute(q, (post_pk,))
         tweet = cursor.fetchone()
-
-        # Hent email direkte fra tweet
         user_email = tweet["user_email"]
-
         email_post_is_blocked = render_template("_email_post_is_blocked.html")
         email_post_is_unblocked = render_template("_email_post_is_unblocked.html")
 
-        # Send email hvis posten er blokeret eller unblocked
         if tweet["post_is_blocked"]:
             x.send_email(user_email, "Your post has been blocked", email_post_is_blocked)
         else:

@@ -639,6 +639,11 @@
         "danish": "Ja - slet min profil",
         "spanish": "Sí - eliminar mi perfil"
     },
+    "could_not_delete_account": {
+        "english": "Could not delete account",
+        "danish": "Kunne ikke slette konto",
+        "spanish": "No se pudo eliminar la cuenta"
+      },
     "deleting_profile": {
         "english": "Deleting profile",
         "danish": "Sletter profil",

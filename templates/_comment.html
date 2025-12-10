@@ -12,7 +12,7 @@
         <form mix-post="/api-delete-comment" class="comment-delete-form">
             <input type="hidden" name="comment_pk" value="{{ comment.comment_pk }}">
             <input type="hidden" name="post_pk" value="{{ comment.comment_post_fk }}">
-            <button type="submit" class="comment-delete-btn">
+            <button type="submit" class="comment-delete-btn" style="pointer-events: none;">
                 <i class="fa-solid fa-trash"></i> {{lans("delete")}}
             </button>
         </form>
